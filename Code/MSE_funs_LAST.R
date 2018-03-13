@@ -226,3 +226,169 @@ hcr.Ftar.Btar <- function (SSB, refpt, Ftar = 0.8, Btrig = 0.75, Fmin = 0.1,
   return(valMin_min)
 }
 environment(hcr.Ftar.Btar) <- environment(hcr)
+
+
+## Changing F by different percentages according to the year (2015 - 2018)
+
+hcr.red.f.year <- function (SSB, Fsq0, refpt, Btrig = 0.75, Fmin = 0.025, 
+                            Blim = 0.25, Bpa=0.5, Ftar, trgyF, trgVec, perc) {
+  
+  if (Blim >= Btrig) 
+    stop("Btrig must be greater than Blim")
+  
+  Btrig = refpt[1, "ssb"] * Btrig
+  Blim = refpt[1, "ssb"] * Blim
+  Fmin = refpt[1, "harvest"] * Fmin
+  valF = NA
+  
+  
+  if(trgyF-trgVec==4){valF = Fsq0*perc[1]} else {
+    if(trgyF-trgVec==3){valF = Fsq0*perc[2]} else {
+      if (trgyF-trgVec==2){valF = Fsq0*perc[3]} else {
+        if(trgyF-trgVec==1){valF = Fsq0*perc[4]} else {
+          valF = (fbar(stk0[,"2018",,,,]))*perc[4]}}}}
+  
+  #  if(trgyF-trgVec==4){valF = Fsq0*1} else {
+  # if(trgyF-trgVec==3){valF = Fsq0*0.91} else {
+  #   if (trgyF-trgVec==2){valF = Fsq0*1} else {
+  #     if(trgyF-trgVec==1){valF = Fsq0*0.91} else {
+  #       valF = (fbar(stk0[,"2018",,,,]))*perc}}}}
+  
+  
+  return(valF)
+}
+
+environment(hcr.red.f.year) <- environment(hcr)
+
+
+## TAC
+
+hcr.max.catch <- function (SSB, Csq0, refpt, Btrig = 0.75, Fmin = 0.025, 
+                           Blim = 0.25, Bpa=0.5, TrgtC) {
+  
+  if (Blim >= Btrig) 
+    stop("Btrig must be greater than Blim")
+  
+  Btrig = refpt[1, "ssb"] * Btrig
+  Blim = refpt[1, "ssb"] * Blim
+  Fmin = refpt[1, "harvest"] * Fmin
+  valC = NA
+  
+  
+  valC = ifelse(Csq0 < TrgtC, Csq0, TrgtC)
+  
+  
+  #  if(trgyF-trgVec==4){valF = Fsq0*1} else {
+  # if(trgyF-trgVec==3){valF = Fsq0*0.91} else {
+  #   if (trgyF-trgVec==2){valF = Fsq0*1} else {
+  #     if(trgyF-trgVec==1){valF = Fsq0*0.91} else {
+  #       valF = (fbar(stk0[,"2018",,,,]))*perc}}}}
+  
+  
+  return(valC)
+}
+
+environment(hcr.max.catch) <- environment(hcr)
+
+## ------------------------------------------------------
+## ------------------------------------------------------
+
+## Changing Fbar to include modifications of ages 0 and 1
+## from 2016 included onwards
+
+hcr.fbar.mod01 <- function (SSB, Fsq0, refpt, Btrig = 0.75, Fmin = 0.025, 
+                            Blim = 0.25, Bpa=0.5, Ftar, Fpstkn) {
+  
+  if (Blim >= Btrig) 
+    stop("Btrig must be greater than Blim")
+  
+  Btrig = refpt[1, "ssb"] * Btrig
+  Blim = refpt[1, "ssb"] * Blim
+  Fmin = refpt[1, "harvest"] * Fmin
+  valF = NA
+  
+  
+  if(trgVec==2015){valF = Fsq0} else {
+    valF = Fpstkn}
+  
+  return(valF)
+}
+
+environment(hcr.fbar.mod01) <- environment(hcr)
+
+## ------------------------------------------------------
+## ------------------------------------------------------
+
+## Applying all F reductions:
+## 1.Changing Fbar to include modifications of ages 0 and 1 (10% and 5% respectivey) in 2016 +
+## 9% reduction on Fbar in 2016
+## 9% reduction on Fbar in 2018
+## Maintain 2018 from 2019 onwards
+
+hcr.allF <- function (SSB, Fsq0, refpt, Btrig = 0.75, Fmin = 0.025, 
+                      Blim = 0.25, Bpa=0.5, Ftar,trgyF,trgVec, Fpstkn, perc) {
+  
+  if (Blim >= Btrig) 
+    stop("Btrig must be greater than Blim")
+  
+  Btrig = refpt[1, "ssb"] * Btrig
+  Blim = refpt[1, "ssb"] * Blim
+  Fmin = refpt[1, "harvest"] * Fmin
+  valF = NA
+  
+  
+  if(trgyF-trgVec==4){valF = Fsq15} else {
+    if(trgyF-trgVec==3){valF = Fpstkn*perc[2]} else {
+      if (trgyF-trgVec==2){valF = Fpstkn*perc[3]} else {
+        if(trgyF-trgVec==1){valF =  Fpstkn*perc[4]} else {
+          valF = (fbar(pstk.n[,"2018",,,,]))*perc[4]}}}}
+  
+  return(valF)
+}
+
+environment(hcr.allF) <- environment(hcr)
+
+
+
+
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------
+# modified mcmc function to resample stock from the SAM assessment.   Thomas Brunel 2018
+#-----------------------------------------------------------------------------------------------------------
+    
+monteCarloStock2 <- 
+function (stck, sam, realisations, run.dir = tempdir(),seed_number) 
+{
+  require(MASS)
+  ctrl <- sam@control
+  mcstck <- propagate(stck, iter = realisations)
+  mcstck <- window(mcstck, start = range(sam)["minyear"], end = range(sam)["maxyear"])
+  mcstck@stock.n[] <- NA
+  mcstck@harvest[] <- NA
+  set.seed(seed_number)
+  random.param <- mvrnorm(realisations, sam@params$value, sam@vcov)
+  save(random.param, file = file.path(run.dir, "random.param.RData"))
+  n.states <- length(unique(ctrl@states[names(which(ctrl@fleets == 
+                                                      0)), ]))
+  yrs <- dims(sam)$minyear:dims(sam)$maxyear
+  ages <- dims(sam)$age
+  u <- random.param[, which(colnames(random.param) == "U")]
+  ca <- random.param[, which(colnames(random.param) == "logCatch")]
+  idxNs <- c(mapply(seq, from = seq(1, ncol(u), ages + n.states), 
+                    to = seq(1, ncol(u), ages + n.states) + ages - 1, by = 1))
+  idxFs <- c(mapply(seq, from = seq(1, ncol(u), ages + n.states) + 
+                      ages, to = seq(1, ncol(u), ages + n.states) + n.states + 
+                      ages - 1, by = 1))
+  mcstck@stock.n[] <- exp(aperm(array(u[, idxNs], dim = c(realisations, 
+                                                          ages, length(yrs))), perm = c(2, 3, 1)))
+  mcstck@harvest[] <- exp(aperm(array(u[, idxFs], dim = c(realisations, 
+                                                          n.states, length(yrs))), perm = c(2, 3, 1)))[ctrl@states[names(which(ctrl@fleets == 
+                                                                                                                                 0)), ], , ]
+  mcstck@catch[] <- exp(aperm(array(ca, dim = c(realisations, 
+                                                length(yrs))), perm = c(2, 1)))
+  return(mcstck)
+}

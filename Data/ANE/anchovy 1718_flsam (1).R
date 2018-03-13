@@ -14,16 +14,10 @@ library(FLSAM)
 library(doBy)
 library(reshape)
 
-
-# path to local github repository
-setwd("C:/Users/brune001/my git files/MSE-Adriatic/")
-
-#
-
 ### ============================================================================
 ### Misc
 ### ============================================================================
-data.source <- file.path("./Data/input files ANE/")    #Data source, not code or package source!!!
+data.source <- file.path("C:/Users/s.angelini/CNR/STECF_small pelagics 2017/LAST STOCK OBJ LIGAS/ANE_sa/")    #Data source, not code or package source!!!
 
 ### ============================================================================
 ### Prepare stock object for assessment
@@ -160,16 +154,15 @@ ANCHOVY.ctrl <- update(ANCHOVY.ctrl)
 ### ============================================================================
 
 #Perform assessment
-#ANCHOVY.sam <- FLSAM(ANCHOVY,ANCHOVY.tun,ANCHOVY.ctrl, run.dir="c:\\samtemp\\")
-ANCHOVY.sam <- FLSAM(ANCHOVY,ANCHOVY.tun,ANCHOVY.ctrl)
-name(ANCHOVY.sam) <- "Anchovy TB"
+ANCHOVY.sam <- FLSAM(ANCHOVY,ANCHOVY.tun,ANCHOVY.ctrl, run.dir="c:\\samtemp\\")
+name(ANCHOVY.sam) <- "Anchovy GSA1718 2017"
 
 #Update stock object
 ANCHOVY      <- ANCHOVY + ANCHOVY.sam
 ANCHOVY@stock <- computeStock(ANCHOVY)
 
 # Save results
-output.dir          <-  file.path("./Data/")
+output.dir          <-  file.path("C:/Users/s.angelini/CNR/STECF_small pelagics 2017/LAST STOCK OBJ LIGAS/ANE_sa/results_newpg/")
 save(ANCHOVY,ANCHOVY.tun,ANCHOVY.ctrl,ANCHOVY.sam,file=file.path(output.dir,paste(name(ANCHOVY),".RData",sep="")))
 
 
