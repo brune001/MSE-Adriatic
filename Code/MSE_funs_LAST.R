@@ -86,6 +86,53 @@ make.arma.resid <- function(arima.fit, age, years, nit){
   return(srDev)
 }
 
+
+
+
+make.arma.resid.lst <- function(arima.fit.list, age, years){
+  ##----------------------------
+  ## simulate structured recruitment residuals on log-scale
+  ## fseparately for each iteration of the stock
+  ## 
+  ## arima.fit.list is a list of fitted arima models (each corresponding to an iteration
+  ## standard deviation of the log recruitment  
+  ## age is a numeric scalar age at recruitment
+  ## years is a numeric vector of years for the residuals
+  ## nit is a numeric scalar for the number of iterations
+  ## Note: only works for ARMA components here so no drif, integration
+  ##----------------------------
+  nyr <- length(years)
+  nit <- length(arima.fit.list)
+  ## container matrix
+  srDev.mat <- matrix(NA, nrow = nit, ncol = nyr)
+  
+  for(i in 1:nit){
+  arima.fit <-arima.fit.list[[i]]
+  ## coefficients
+  theta <- coef(arima.fit)
+  ## model set up for simulations, not fully general
+  model.list <- list()
+  if("ar1" %in% names(theta)){
+    model.list$ar <- an(theta[grep("ar", names(theta))])
+  }
+  if("ma1" %in% names(theta)){
+    model.list$ma <- an(theta[grep("ma", names(theta))])
+  }
+  ## standard deviations of the innovations
+  sd.innov <- sqrt(arima.fit$sigma2)
+  
+  ## sample
+  
+    srDev.mat[i, ] <- an(arima.sim(n = nyr,
+                                   model = model.list,
+                                   sd = sd.innov))    
+  }
+  ## create the FLQuant
+  srDev <- FLQuant(an(t(srDev.mat)),
+                   dimnames = list(year = years, age = age, iter = 1:nit))  
+  return(srDev)
+}
+
 ## hcr that doesn't check the margins
 ## from FLBRP
 hcr.nocheck <- function (SSB, refpt, Ftar = 0.8, Btrig = 0.75, Fmin = 0.025, 
@@ -361,7 +408,7 @@ environment(hcr.allF) <- environment(hcr)
 #-----------------------------------------------------------------------------------------------------------
     
 monteCarloStock2 <- 
-function (stck, sam, realisations, run.dir = tempdir(),seed_number) 
+function (stck, sam, realisations,seed_number) 
 {
   require(MASS)
   ctrl <- sam@control
@@ -370,8 +417,8 @@ function (stck, sam, realisations, run.dir = tempdir(),seed_number)
   mcstck@stock.n[] <- NA
   mcstck@harvest[] <- NA
   set.seed(seed_number)
-  random.param <- mvrnorm(realisations, sam@params$value, sam@vcov)
-  save(random.param, file = file.path(run.dir, "random.param.RData"))
+  random.param <<- mvrnorm(realisations, sam@params$value, sam@vcov)
+  #save(random.param, file = file.path(run.dir, "random.param.RData"))
   n.states <- length(unique(ctrl@states[names(which(ctrl@fleets == 
                                                       0)), ]))
   yrs <- dims(sam)$minyear:dims(sam)$maxyear
