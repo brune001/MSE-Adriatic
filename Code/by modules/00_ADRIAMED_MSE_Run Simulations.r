@@ -62,47 +62,30 @@ assess.name <- "Anchovy GSA 17-18 (1)"
 
 number.years.simulated  <- 5
 number.replicates.stock <- 2
-management.scenario     <- "mgt1"
+management.scenarios     <- list("mgt1")
 
 
 
-
-blim <- 45936
-bpa <- 2*blim
 
 # Load assessment data
 source('./Code/by modules/01_ADRIAMED_MSE_Load assessment data.r')
 # Set up objects and configuration of the MSE
 source('./Code/by modules/02_ADRIAMED_MSE_Set up objects and configuration.r')
+# need an assumption to project the OM on the first years
+TAC[,(ac(iy))] <- 15000 #  WHAT IS A REALISTIC VALUE , needs to go somewhere else
+
 # Define BRPs and Management Scenarios
+source('./Code/by modules/03_ADRIAMED_MSE_BRPs and Scenarios.r')
+# Save the environment at the start of the simulations
+save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
 
-
-
-# NEED AN ASSUMPTION   TO FORECAST THE OM IN THE FIRST YEAR
-TAC[,(ac(iy))] <- 15000 #  WHAT IS A REALISTIC VALUE ?
-# Set up the Btrigger (in this case halfway between Blim and Bpa)
-blim <- 45936
-bpa <- blim*2
-Btrig <- blim+((bpa-blim)/2)
-dt <- date()
-fsq <- mean(c(fbar(stk)[,ac(dy)]))                                                   
 
 
 
 # run the simulation
-source('./Code/by modules/04_ADRIAMED_MSE_Simulations.r')
+source('./Code/by modules/04_ADRIAMED_MSE_Simulations.r')      # load the function go_fish
 
-
-
-# breakpoint mean(SSB)
-ANE_Opt1a_mse.pstk.GFCM_segregmeanSSB_Fsq0 <- pstk
-ANE_Opt1a_mse.stk0.GFCM_segregmeanSSB_Fsq0 <- stk0
-plot(ANE_Opt1a_mse.pstk.GFCM_segregmeanSSB_Fsq0)
-save(list = c("ANE_Opt1a_mse.pstk.GFCM_segregmeanSSB_Fsq0", "ANE_Opt1a_mse.stk0.GFCM_segregmeanSSB_Fsq0"), file = "Results/ANE/ANE_Opt1a_mse_SegregmeanSSB_statusQuo_250it.RData")
-png("ANE_Opt1a_mse_SegregmeanSSB_statusQuo_250it.png", width=700, height=700)
-plot(ANE_Opt1a_mse.pstk.GFCM_segregmeanSSB_Fsq0)
-dev.off()
-
+lapply(management.scenarios , function(scen) go_fish(scen))    # run the simulation for each management scenario
 
 
 

@@ -24,10 +24,49 @@
 
 
 
-BRP <- list(
-        Blim = 45936,
-        Bpa  = 2*45936)
+##########################################
+# define scenarios 1 by 1 
+
+#-----scenario mgt1------------------------
+blim <- 45936
+bpa <- blim*2
+Btrig <- blim+((bpa-blim)/2)
+fsq <- mean(c(fbar(stk)[,ac(dy)]))                                                   
+
+mgt1 <- list(     name = "mgt1" ,
+                  BRP = c(
+                      Blim  = blim,
+                      Bpa   = blim*2 ,
+                      Btrig = blim+((bpa-blim)/2) ,
+                      Ftarget = mean(c(fbar(stk)[,ac(dy)]))
+                              ) ,
+                  HCR = c(Btrig = NA , Ftarget = Ftarget , TAC_IAV = NA )
+                  )    
 
 
 
-GO HAVE A LOOK AT HOW YOU DID IT FOR DRUMFISH
+
+#-------scenario mgt2----------------------
+blim <- 45936
+bpa <- blim*2
+Btrig <- bpa
+fsq <- mean(c(fbar(stk)[,ac(dy)]))                                                   
+
+mgt2 <- list(     name = "mgt2" ,
+                  BRP = c(
+                      Blim  = blim,
+                      Bpa   = blim*2 ,
+                      Btrig = blim+((bpa-blim)/2) ,
+                      Ftarget = mean(c(fbar(stk)[,ac(dy)]))
+                              ) ,
+                  HCR = c(Btrig = NA , Ftarget = Ftarget , TAC_IAV = NA )
+                  )    
+
+
+
+########################################
+# combine them in a list
+
+scenarios <- list(mgt1,mgt2)
+names(scenarios) <- lapply (scenarios , function(x) x[[1]])
+

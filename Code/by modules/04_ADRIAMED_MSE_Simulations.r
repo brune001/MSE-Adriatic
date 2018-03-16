@@ -1,4 +1,20 @@
 
+go_fish <- function(sc)                
+{
+ # sc <- management.scenarios[[1]]
+
+load(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
+
+
+
+# define the management quantities corresponding to the scenario
+Ftarget <- scenarios[[sc]][["HCR"]]["Ftarget"]
+
+
+
+
+
+
 
 
 #########################################################
@@ -76,7 +92,6 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
 ### STF ON THE PERCIEVED STOCK TO PRODUCE AND ADVICE
   # fwd control
   # what is F status quo? is it fixed or does it vary as you progress in the projection?
-  fsq0 <- fsq # status quo 2013-2015 from SAM (deterministic)
   # dnms <- list(iter=1:it, year=c(iay, iay + 1), c("min", "val", "max"))   # I changed that because the order of the dimensions did not correspond to those in the crtl object
                                                                             # this was wrong and did not project the stock correctly
                                                                             # for instance when doing fbar(stkTmp), we did not get fsq0
@@ -85,13 +100,14 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   arr0 <- array(NA, dimnames=dnms, dim=unlist(lapply(dnms, length)))
   ## ftrg.vec <- rep(ftrg, it) ## original
   refpt <- data.frame(harvest = 1)
-  ftrg.vec <- an(fsq0) # Ftarget = status quo
+  fsq0 <- c(fbar(stk0)[,ac(iay-1)]) # Ftarget = status quo
   #Bescape <- blim
-  arr0[,"val",] <- c(fsq0, ftrg.vec)                                        # changed as above
+  arr0[1,"val",] <- c(fsq0)           #intermediate year in  the STF
+  arr0[2,"val",] <- c (Ftarget)       # advice year in the STF                                 # changed as above
   #arr0[,,"min"] <- c(rep(NA, 2 * it), rep(Bescape, it))
   #arr0 <- aperm(arr0, c(2,3,1))
   # in Control you define what you want to vary in iay and iay+1 (which is F)
-  ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity=c('f', 'f'), val=c(fsq0, ftrg.vec)))
+  ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity=c('f', 'f'), val=c(mean(fsq0), Ftarget)))
   ctrl@trgtArray <- arr0
   ## Short term forecast of stk0
   stkTmp <- stf(stk0, 2)
@@ -116,3 +132,5 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
  pstk <- fwd(pstk, ctrl=ctrlOM, sr=sr, sr.residuals = exp(sr.res[,ac(iay)]), sr.residuals.mult = TRUE) #
 }
 
+save(pstk,stk0,file = paste0("./Results/",species,"/simres/",sc,".RData"))
+}
