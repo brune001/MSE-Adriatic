@@ -1,26 +1,8 @@
 ###############################################################################
-# 
-#EJ(20150119)
-# Tests on the evaluation of the NS-MAP using COD
-# NOTE1: The final analysis is in the report file.
-#  One may tangle the Snw file to get the R script trimmed of comments.
 #
-# Modified from Piera Carpi, AgurtzPIL Urtizberea Ijurco & Miguel Bernal
-# 20 January 2016
-# Changed for ANCHOVY MSE for GFCM 
+#  look at SE
 #
-# Modified by Betulla Morello
-# February/MARCH 2017
-# Updated for 2017 GFCM WKMSE, using WGSAD2016 assessment data (last year=dy=2015)
-# FINAL VERSION UPLOADED ONTO GFCM SERVER
-#
-# Scenario numbers in brackets are equivalent to scenario numbers in the report
-#
-#
-#   NEW VERSION  MARCH 2018 : Thomas BRUNEL (WMR)
-#   SAM is fully integrated (assessment in the loop, uncertainty on starting conditions and model parameters incorporated in the OM)
-#
-###############################################################################
+##############################################################################
 
 #==============================================================================
 # libraries and constants
@@ -55,10 +37,10 @@ source('./Code/MSE_funs_LAST.R')
 # Inputs and outputs of the Anchovy SAM accepted at 2017 GFCM WGSAD 
 #==============================================================================
 
-load("./Data/ANE/Anchovy GSA 17-18 (1).RData")
+load("./Data/ANCHOVY/Anchovy GSA 17-18 (1).RData")
 
 
-stk                           <- ANCHOVYnew
+stk                           <- ANCHOVY
 sam                           <- ANCHOVY.sam
 ids                           <- ANCHOVY.tun
 sam.ctrl                      <- ANCHOVY.ctrl
@@ -67,11 +49,15 @@ sam.ctrl                      <- ANCHOVY.ctrl
 #       sam.ctrl.new <- FLSAM.control(stk,ids)
 #       for (slt in slotNames(sam.ctrl.new))  try( slot(sam.ctrl.new,slt) <- slot(sam.ctrl,slt))
 
-# just a quick check that we can reproduce the assessment
-  ANCHOVY2.sam <- FLSAM(stk,ids,sam.ctrl)
+# try with a 0% mature at age 0 
+ stk2<-stk
+ stk2@mat[1] <- 0
+  ANCHOVY2.sam <- FLSAM(stk2,ids,sam.ctrl)
    rbind(ssb(ANCHOVY2.sam)[,2],ssb(ANCHOVY.sam)[,2])
+stk2<-stk2+ANCHOVY2.sam
 
 
+plot(FLStocks(stk,stk2))
 #==============================================================================
 # Single species MSE
 #==============================================================================
@@ -86,64 +72,10 @@ sam.ctrl                      <- ANCHOVY.ctrl
 # Fmsy: 0.3 
 #==============================================================================
 
+
+plot(ssb(stk2),rec(stk2),xlim=c(0,160000) , ylim= c(0,2e8))
 #------------------------------------------------------------------------------
-# variables to fix and OM conditioning
-#------------------------------------------------------------------------------
 
-#-------------------------------------------------------------------------------
-# 1 : setting dimensions
-#-------------------------------------------------------------------------------
-
-it <- 3     # 250                      # iterations - should be 250
-y0 <- range(ANCHOVYnew)["minyear"]      # year zero (initial) = 1975
-ny <- 5                                # number of years to project - Usually 20
-# In order for this code to run iy = dy
-dy <- range(ANCHOVYnew)["maxyear"]      # data year
-ay <- dy                                # assessment year
-iy <- ay+1                              # initial projections year (also intermediate)
-fy <- iy + ny -1                        # final year
-py <- y0:dy                             # past years
-vy <- ac(iy:fy)                         # future years
-nsqy <- 3                               # number of SQ years upon which to average results
-
-mny <- 2020                             #2016 # min year to get to trg
-mxy <- 2020                             # 2016 # max year to get to trg
-
-#-------------------------------------------------------------------------------
-# 2 : Create stock object & use vcov for new realisations
-#-------------------------------------------------------------------------------
-
-
-
-sstk                            <- monteCarloStock2 ( stk , sam , it , seed_number=floor(pi*10000))
-
-save(random.param,file= "./Results/ANE/random.param.RData")    # location where the model parameters for the nits replicates will be stored
-#sstk                            <- window(sstk, start = y0 , end = fy)
-#sstk@catch.n                    <- sstk@stock.n * sstk@harvest / (sstk@harvest + sstk@m) * (1 - exp(-sstk@harvest - sstk@m))
-#sstk@landings.n                 <- sstk@catch.n
-
-
-
-
-
-# Management quantities
-#flo <- 0.23
-#fup <- 0.36
-#fmsy <- 0.55
-# 1. F status quo: maintain F from 2015
-fsq <- mean(c(fbar(stk)[,ac(dy)]))                                                   ###### why taking the mean across iterations and not the median??
-# 2. Blim from 2015 benchmark reference points (tonnes)
-blim <- 45936
-# 3. Bpa from 2015 benchmark reference points (tonnes)
-bpa <- 2*blim
-
-#--------------------------------------------------------------------------------------------
-# 4 :  S/R
-#--------------------------------------------------------------------------------------------
-
-############################################################################
-#      4A. hockey stick with break point at meanSSB over the entire time series:
-############################################################################
 # fit hockey stick
 # THIS PART AS BEEN MODIFIED SO THAT A MODEL IS FITTED FOR EACH ITERATION
 # THERE ARE NOW AS MANY PARAMETERS AS ITERATIONS
