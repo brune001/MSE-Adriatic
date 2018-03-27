@@ -176,6 +176,13 @@ dev.off()
 TAC <- FLQuant(NA, dimnames=list(TAC="all", year=vy, iter=1:it))
 BB  <- FLQuant(0, dimnames=list(TAC="all", year=vy, iter=1:it))
 
+# CONDITIONNING FOR PROJECTING THE OPERATING MODEL DURING THE FIRST YEAR OF THE SIMS
+# assumption here is that the catches in 2017 for each species are equal to the catch limit 
+# established at the 2014 level
+TAC[,(ac(iy))] <- catch(sstk)[,"2014"] #  WHAT IS A REALISTIC VALUE , needs to go somewhere else
+
+
+
 # 
                         
 # short term forecast: start with a projection of F into the future to ny (16 yrs)

@@ -71,8 +71,7 @@ management.scenarios     <- list("mgt1")
 source('./Code/by modules/01_ADRIAMED_MSE_Load assessment data.r')
 # Set up objects and configuration of the MSE
 source('./Code/by modules/02_ADRIAMED_MSE_Set up objects and configuration.r')
-# need an assumption to project the OM on the first years
-TAC[,(ac(iy))] <- 15000 #  WHAT IS A REALISTIC VALUE , needs to go somewhere else
+
 
 # Define BRPs and Management Scenarios
 source('./Code/by modules/03_ADRIAMED_MSE_BRPs and Scenarios.r')
