@@ -22,12 +22,16 @@
 #
 ###############################################################################
 
+
+################################################################################
 #  define BRPs
+################################################################################
+
+
 if (species == "ANCHOVY")
 {
 blim  <- 45936
 bpa   <- blim*2
-Btrig <- blim+((bpa-blim)/2)
 Fmsy  <- 0.55                                                   
 }
 
@@ -35,19 +39,21 @@ if (species == "SARDINE")
 {
 blim  <- 125318
 bpa   <- blim*2
-Btrig <- blim+((bpa-blim)/2)
 Fmsy  <- 0.72                                                   
 }
 
 
+
+################################################################################
 # define the function for the HCRs
+################################################################################
 
 # to apply a constant F
- HCR.cstF <- function(stoc, target , year)
+ HCR.cstF <- function(stoc, target)
                   {
                   targ<-list()
                   targ$quant = "f"
-                  targ$val = c(fbar(stoc)[,ac(range(stoc)["maxyear"])] , mgt.target["Ftarget"])
+                  targ$val = list(y1 = c(fbar(stoc)[,ac(range(stoc)["maxyear"])]) , y2 = target$Ftarget)
                   targ$rel = c(NA,NA)
                   return(targ)
                   }
@@ -57,72 +63,188 @@ Fmsy  <- 0.72
 # is updated based on the latest assessment
  HCR.time.target.F <- function(stoc, target)
                   {
+                  # define time and F 
                   ylast <- range(stoc)["maxyear"]    #  last assessment year
                   ytarg <- target[["Yr.targ"]]
-                  flast <- fbar(stoc)[,ac(ylast)]   
-                  perc.red  <- (flast - Fmsy ) / (ytarg - ylast) # percentage reduction
-                  mult      <-  1-perc.red                       # multiplier to apply
-                  
+                  flast <- fbar(stoc)[,ac(ylast)] 
+                  ftarget <- target$Ftarget 
+                  # reduction to apply
+                  perc.red  <- (flast - ftarget ) / (ytarg - ylast) # percentage reduction
+                  mult1 <-   1 - perc.red                       # multiplier to apply in the first year
+                  mult2 <-   1 - 2*perc.red                     # multiplier to apply in the 2nd year, compared to the current F
+                  if(ytarg == (ylast+1)) mult2 <- ftarget/flast         # in case is reached during the intermediate year
+                  # build the target object                  
                   targ<-list()
                   targ$quant = "f"
-                  targ$val = mult
-                  targ$rel = ac(ylast:(ylast+1))
+                  targ$val = list(y1 = c(flast*mult1) , y2 = c(flast*mult2))
+                  targ$rel = c(NA,NA)
+                  
+                  # if we are past the target year to reach Fmsy, just apply a flat Fmsy
+                  if(ylast>=ytarg) targ <- HCR.cstF (stoc, target) 
+                  
+                  
                   return(targ)
                   }                  
 
-##########################################
+# to apply a constant catch
+ HCR.cstC <- function(stoc, target)
+                  {     
+                  targ<-list()
+                  targ$quant = "catch"
+                  targ$val = list(y1 = c(catch(stoc)[,ac(range(stoc)["maxyear"])]) , y2 = target$Ctarget)
+                  targ$rel = c(NA,NA)
+                  return(targ)
+                  }
+                  
+ 
+# to apply the HCR defined by GFCM 2013 recommandation
+# F=Fmax if B>Btrig
+# F=0    if B<Blim
+# F= Fmax * (B-Bpa)/(Bpa-Blim)  if blim <= B <= Btri
+
+HCR.gfcm <- function(stoc, target)
+                  {
+                  # management points
+                  Fmax      <- target$Fmax
+                  Btrig     <- target$Btrig
+                  ssb.now <- ssb(stoc)[,ac(range(stoc)["maxyear"])]
+                  
+                  #  compute the Ftarget
+                  Ftarget   <- c(fbar(stoc)[,ac(range(stoc)["maxyear"])])
+                  Ftarget[] <- Fmax  #empty object to store the result
+                  
+                  sliding.slope <-  c((ssb.now - blim) / (bpa-blim))
+                  sliding.slope[sliding.slope<0]   <- 0
+                  sliding.slope[sliding.slope>0.5] <- 1                  
+                  
+                  Ftarget <- Ftarget * sliding.slope
+                  
+                  targ<-list()
+                  targ$quant = "f"
+                  targ$val = list(y1 = c(fbar(stoc)[,ac(range(stoc)["maxyear"])]) , y2 = Ftarget)
+                  targ$rel = c(NA,NA)
+                  return(targ)
+                  }
+   
+ 
+ 
+                  
+                  
+################################################################################
 # define scenarios 1 by 1 
-
-#-----scenario 1 : F status quo ------------------------
-
-# basis Ftarget = Fsq used to give advice starting in 2018
-# Fsq = F2014-2016
+################################################################################
 
 
-Fsq <- list( name = "Fsq" ,
+
+################################################################################
+#----- Constant F scenarios ------------------------
+
+# scenario F status quo : 
+      # basis Ftarget = Fsq used to give advice starting in 2018
+      # Fsq = F2014-2016
+F.sq <- list( name = "F.sq" ,
              target = list(Ftarget = mean(c(fbar(stk)[,ac(dy)]))) ,
-             HCR =  HCR.cstF
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
            )    
 
 
 
-#-----scenario 2 : 	Fmsy2020 ------------------------
-# basis  : Linear reduction of F towards FMSY by 2020
-# 
+# scenario Fmsy :
+      # basis Ftarget = Fmsy used to give advice starting in 2018
+      
+F.msy <- list( name = "F.msy" ,
+             target = list(Ftarget = Fmsy) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )    
 
 
+
+
+################################################################################
+#----- scenarios to reach a target F in a given year ------------------------
+
+
+# Linear reduction of F towards FMSY by 2020
 Fmsy2020 <- list( name = "Fmsy2020" ,
                   target = list(Yr.targ = 2020 , Ftarget = Fmsy) ,
-                  HCR =  HCR.time.target.F
+                  HCR =  HCR.time.target.F,
+                  spatial.closure = F ,
+                  additionnal.F.reduction = NA
                 )    
 
 
-
+# Linear reduction of F towards FMSY by 2020
+Fmsy2025 <- list( name = "Fmsy2025" ,
+                  target = list(Yr.targ = 2025 , Ftarget = Fmsy) ,
+                  HCR =  HCR.time.target.F,
+                  spatial.closure = F ,
+                  additionnal.F.reduction = NA
+                )    
 
 
                  
 
-#-------scenario mgt2----------------------
-blim <- 45936
-bpa <- blim*2
-Btrig <- bpa
-fsq <- mean(c(fbar(stk)[,ac(dy)]))                                                   
+################################################################################
+#----- Constant catch scenarios ------------------------
 
-mgt2 <- list(     name = "mgt2" ,
-                  BRP = c(
-                      Blim  = blim,
-                      Bpa   = blim*2 ,
-                      Btrig = blim+((bpa-blim)/2) ,
-                      Ftarget = mean(c(fbar(stk)[,ac(dy)]))
-                              ) ,
-                  HCR = c(Btrig = NA , Ftarget = Ftarget , TAC_IAV = NA )
-                  )    
+# scenario Catch at 2014 level
+C2014 <- list( name = "C2014" ,
+             target = list(Ctarget = c(catch(stk)[,ac(2014)])) ,
+             HCR =  HCR.cstC ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )    
+
+# scenario Catch at historic lowest level
+Chistmin <- list( name = "Chistmin" ,
+             target = list(Ctarget = c(min(catch(stk)))) ,
+             HCR =  HCR.cstC ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )    
+
+
+################################################################################
+#----- scenarios X% annual decrease in the catches untill Bpa is reached ------------------------
+
+# scenario Catch at 2014 level
+C5red <- list( name = "C5red" ,
+             target = list(prec.red = 0.05, Btarget = Bpa) ,
+             HCR =  HCR.Cred ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )    
+
+
+
+################################################################################
+#----- 	GFCM recommendation (2013)  ------------------------
+
+# scenario based on the GFCM proposed haverst control rule
+
+GFCM.HCR <- list( name = "GFCM.HCR" ,
+             target = list(Fmax = Fmsy , Btrig = mean(c(bpa,blim))) ,
+             HCR =  HCR.gfcm ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )    
+
+
+
+
+
+
 
 
 
 ########################################
 # combine them in a list
 
-scenarios <- list(Fsq,mgt2)
-names(scenarios) <- lapply (scenarios , function(x) x[[1]])
+# management.scenarios <- list(Fsq,Fmsy,Fmsy2020,Fmsy2020,Fmsy2025,C2014 , Chistmin)
+management.scenarios <- list(Fmsy2020)
+names(management.scenarios) <- lapply (management.scenarios , function(x) x[[1]])
 

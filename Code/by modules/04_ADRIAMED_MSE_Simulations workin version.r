@@ -1,19 +1,31 @@
 
 go_fish <- function(sc)                
 {
- # sc <- management.scenarios[[1]]
-
+ # sc <- "Fmsy"
+ # sc <- "Fmsy2020"
+ # sc <- "C2014"
+ # sc <- "Chistmin"
+ # sc <- "GFCM.HCR" 
+ 
+ 
+ 
+ 
 load(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
 
 
 
-# define the management quantities corresponding to the scenario
-mgt.target <- scenarios[[sc]][["target"]]
-HCR        <- scenarios[[sc]][["HCR"]]
+# define the management options for this scenario
+mgt.target <- management.scenarios[[sc]][["target"]]
+HCR        <- management.scenarios[[sc]][["HCR"]]
+sp.closure <- management.scenarios[[sc]][["spatial.closure"]]
+addFred    <- management.scenarios[[sc]][["additionnal.F.reduction"]]
 
-
-
-
+# if scenario with spatial closure, adjust the selection pattern to be applied for the OM
+if (!is.null(sp.closure) && sp.closure)
+{
+sel.change <- c(0.9,0.95,1.1,1.1,1.1)
+harvest(pstk)[,vy]       <-  sweep (harvest(pstk)[,vy] , c(1,3:6) , sel.change , "*" )
+}
 
 
 
@@ -100,22 +112,25 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   target <-  HCR(stk0 , mgt.target )
   
   # create the control object
-  ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity=c('f', target$quant), val=c(mean(fsq0), mean(target$val))))
+  ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity= target$quant, val=c(mean(target$val$y1), mean(target$val$y2)), rel.year = target$rel))
   
   # populate the iteration specific values
-  fsq0 <- c(fbar(stk0)[,ac(iay-1)]) # Ftarget = status quo
-  dnms <- list(year=c(iay, iay + 1), c("min", "val", "max"),iter=1:it)
+#  dnms <- list(year=c(iay,(iay+1)), c("min", "val", "max"),iter=1:it)
+  dnms <- list(1:2, c("min", "val", "max"),iter=1:it)  
   arr0 <- array(NA, dimnames=dnms, dim=unlist(lapply(dnms, length)))
-  arr0[1,"val",] <- c(fsq0)            #intermediate year in  the STF
-  arr0[2,"val",] <- c(target$val)      # advice year in the STF                                 # changed as above
+  arr0[1,"val",] <- c(target$val$y1)            #intermediate year in  the STF
+  arr0[2,"val",] <- c(target$val$y2)      # advice year in the STF                                 # changed as above
   ctrl@trgtArray <- arr0
   
   ## Short term forecast object 2 years of stk0
   stkTmp <- stf(stk0, 2)
   # project forward with the control you want and the SR rel you defined above, with residuals
-  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=sr) #, sr.residuals = exp(sr.res[,ac(iay:(iay+1))]), sr.residuals.mult = TRUE) #  !!!!!! TB : removed this part because there should not be any residuals here
+  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=sr, maxF = 5) 
+  
+  # update objects storing the basis for the advice
   TAC[,ac(iay+1)] <- catch(stkTmp)[,ac(iay+1)]
-
+  SSBad[,ac(iay+1)] <- ssb(stkTmp)[,ac(iay+1)]
+  Fad[,ac(iay+1)] <- fbar(stkTmp)[,ac(iay+1)]
 
 
 ### UPDATE THE OM BASED ON THE TAC ADVICE (with on year lag)
@@ -131,7 +146,10 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
  ctrlOM@trgtArray <- arr0
  # update pstk with stkTmp
  pstk <- fwd(pstk, ctrl=ctrlOM, sr=sr, sr.residuals = exp(sr.res[,ac(iay)]), sr.residuals.mult = TRUE) #
-}
 
-save(pstk,stk0,file = paste0("./Results/",species,"/simres/",sc,".RData"))
+}  # end of year loops
+
+
+
+save(pstk,stk0,Fad,SSBad,TAC,file = paste0("./Results/",species,"/simres/",sc,".RData"))
 }

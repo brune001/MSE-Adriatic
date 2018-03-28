@@ -173,8 +173,8 @@ dev.off()
 #######################################################################################################################################
 
 # Fixed objects
-TAC <- FLQuant(NA, dimnames=list(TAC="all", year=vy, iter=1:it))
-BB  <- FLQuant(0, dimnames=list(TAC="all", year=vy, iter=1:it))
+TAC <- SSBad <- Fad <- FLQuant(NA, dimnames=list(TAC="all", year=vy, iter=1:it))
+
 
 # CONDITIONNING FOR PROJECTING THE OPERATING MODEL DURING THE FIRST YEAR OF THE SIMS
 # assumption here is that the catches in 2017 for each species are equal to the catch limit 
