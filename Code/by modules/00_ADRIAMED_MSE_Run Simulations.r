@@ -29,6 +29,7 @@
 rm(list=ls())
 library(FLa4a)
 library(FLash)
+library(FLasher)
 library(FLAssess)
 library(ggplotFL)
 library(FLBRP)
