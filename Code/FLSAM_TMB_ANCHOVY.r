@@ -110,10 +110,6 @@ sam.ctrl.new <- update(sam.ctrl.new)
 #
 #- Final model
 sam.ctrl.new@logN.vars[]                                  <- 0
-sam.ctrl.new@obs.vars["catch unique",ac(0:4)]             <- c(0,1,2,2,2)
-sam.ctrl.new@obs.vars["Echo West",ac(0:4)]                <- c(0,0,1,1,1) + 101
-sam.ctrl.new@obs.vars["Echo East",ac(0:2)]                <- c(0,1,2) + 201
-sam.ctrl.new@obs.vars["Echo East Biomass",ac(0)]          <- 301
 sam.ctrl.new@states["catch unique",ac(4)]                 <- 3
 sam.ctrl.new                                              <- update(sam.ctrl.new)
 ANCHOVY2.sam                                              <- FLSAM(stk,ids,sam.ctrl.new)

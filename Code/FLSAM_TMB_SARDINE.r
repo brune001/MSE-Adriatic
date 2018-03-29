@@ -62,28 +62,28 @@ sam.ctrl.new <- update(sam.ctrl.new)
 
 # just a quick check that we can reproduce the assessment
 
-  SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new)
-  SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new,starting.values=list(logF=log(stk@harvest[,drop=T]),logN=log(stk@stock.n[,drop=T])))
-  
-  SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new,starting.values=FLSAM2par(SARDINE2.sam))
-   matplot(t(rbind(ssb(SARDINE2.sam)[,2],ssb(SARDINE.sam)[,2])),type="l")
-
-
-#- Fix logN.vars first
-sam.ctrl.new@logN.vars[]            <- 0
-SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new,starting.values=list(logF=log(stk@harvest[-5,][,drop=T]),logN=log(stk@stock.n[,drop=T])))#FAIL
-
-#- Try to bind some obs.var paramters together + logN.vars
-sam.ctrl.new@obs.vars["catch unique",ac(0:4)]             <- 0
-sam.ctrl.new@obs.vars["Echo West",ac(0:4)]                <- c(0,0,1,1,2) + 101
-sam.ctrl.new@obs.vars["Echo East",ac(0:2)]                <- c(0,1,2) + 201
-sam.ctrl.new@obs.vars["Echo East Biomass",ac(0)]          <- 301
-sam.ctrl.new                                              <- update(sam.ctrl.new)
-SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new,starting.values=list(logF=log(stk@harvest[-5,][,drop=T]),logN=log(stk@stock.n[,drop=T])))
-
-#- put cor.F to 2
-sam.ctrl.new@cor.F <- 2
-system.time(SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new))
+#  SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new)
+#  SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new,starting.values=list(logF=log(stk@harvest[,drop=T]),logN=log(stk@stock.n[,drop=T])))
+#
+#  SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new,starting.values=FLSAM2par(SARDINE2.sam))
+#   matplot(t(rbind(ssb(SARDINE2.sam)[,2],ssb(SARDINE.sam)[,2])),type="l")
+#
+#
+##- Fix logN.vars first
+#sam.ctrl.new@logN.vars[]            <- 0
+#SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new,starting.values=list(logF=log(stk@harvest[-5,][,drop=T]),logN=log(stk@stock.n[,drop=T])))#FAIL
+#
+##- Try to bind some obs.var paramters together + logN.vars
+#sam.ctrl.new@obs.vars["catch unique",ac(0:4)]             <- 0
+#sam.ctrl.new@obs.vars["Echo West",ac(0:4)]                <- c(0,0,1,1,2) + 101
+#sam.ctrl.new@obs.vars["Echo East",ac(0:2)]                <- c(0,1,2) + 201
+#sam.ctrl.new@obs.vars["Echo East Biomass",ac(0)]          <- 301
+#sam.ctrl.new                                              <- update(sam.ctrl.new)
+#SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new,starting.values=list(logF=log(stk@harvest[-5,][,drop=T]),logN=log(stk@stock.n[,drop=T])))
+#
+##- put cor.F to 2
+#sam.ctrl.new@cor.F <- 2
+#system.time(SARDINE2.sam <- FLSAM(stk,ids,sam.ctrl.new))
 
 #- Final model
 sam.ctrl.new@logN.vars[]                                  <- 0
@@ -94,15 +94,21 @@ sam.ctrl.new@obs.vars["Echo East Biomass",ac(0)]          <- 301
 sam.ctrl.new                                              <- update(sam.ctrl.new)
 SARDINE2.sam                                              <- FLSAM(stk,ids,sam.ctrl.new)
 
+SARDINE2     <- SARDINE + SARDINE2.sam
+SARDINE2.tun <- SARDINE.tun
+SARDINE2.ctrl<- sam.ctrl.new
+
+save(SARDINE2,SARDINE2.sam,SARDINE2.tun,SARDINE2.ctrl ,file ="./Data/SARDINE/SARDINE GSA 17-18_tbmSAM.RData" )
+
 
 #- Impact matrix
-- logN -> failure
-- obs.var -> failure
-- logN + obs.var -> stable but with covar issues
-- cor.F=2 -> failure
-- logN + cor.F=2 -> stable no covar issues, fast,
-- logN + obs.var + cor.F=2 -> stable, fast, lower AIC, no covar issues
-
+#- logN -> failure
+#- obs.var -> failure
+#- logN + obs.var -> stable but with covar issues
+#- cor.F=2 -> failure
+#- logN + cor.F=2 -> stable no covar issues, fast,
+#- logN + obs.var + cor.F=2 -> stable, fast, lower AIC, no covar issues
+#
 
 
 
