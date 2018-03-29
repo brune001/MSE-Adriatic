@@ -133,6 +133,10 @@ make.arma.resid.lst <- function(arima.fit.list, age, years){
   return(srDev)
 }
 
+need.it <- F
+
+if (need.it)
+         {
 ## hcr that doesn't check the margins
 ## from FLBRP
 hcr.nocheck <- function (SSB, refpt, Ftar = 0.8, Btrig = 0.75, Fmin = 0.025, 
@@ -398,7 +402,7 @@ environment(hcr.allF) <- environment(hcr)
 
 
 
-
+               }
 
 
 
@@ -439,3 +443,90 @@ function (stck, sam, realisations,seed_number)
                                                 length(yrs))), perm = c(2, 1)))
   return(mcstck)
 }
+
+monteCarloStock3 <- function (stck, sam, realisations,seed_number) 
+{
+  require(MASS)
+  ctrl <- sam@control
+  mcstck <- propagate(stck, iter = realisations)
+  mcstck <- window(mcstck, start = range(sam)["minyear"], end = range(sam)["maxyear"])
+  mcstck@stock.n[] <- NA
+  mcstck@harvest[] <- NA
+  set.seed(seed_number)
+  random.param <<- mvrnorm(realisations, sam@params$value[is.element(sam@params$name,colnames(sam@vcov))], sam@vcov)
+  #save(random.param, file = file.path(run.dir, "random.param.RData"))
+  n.states <- length(unique(ctrl@states[names(which(ctrl@fleets == 
+                                                      0)), ]))
+  yrs <- dims(sam)$minyear:dims(sam)$maxyear
+  ages <- dims(sam)$age
+  u <- random.param[, which(colnames(random.param) == "U")]
+  ca <- random.param[, which(colnames(random.param) == "logCatch")]
+  idxNs <- c(mapply(seq, from = seq(1, ncol(u), ages + n.states), 
+                    to = seq(1, ncol(u), ages + n.states) + ages - 1, by = 1))
+  idxFs <- c(mapply(seq, from = seq(1, ncol(u), ages + n.states) + 
+                      ages, to = seq(1, ncol(u), ages + n.states) + n.states + 
+                      ages - 1, by = 1))
+  mcstck@stock.n[] <- exp(aperm(array(u[, idxNs], dim = c(realisations, 
+                                                          ages, length(yrs))), perm = c(2, 3, 1)))
+  mcstck@harvest[] <- exp(aperm(array(u[, idxFs], dim = c(realisations, 
+                                                          n.states, length(yrs))), perm = c(2, 3, 1)))[ctrl@states[names(which(ctrl@fleets == 
+                                                                                                                                 0)), ], , ]
+  mcstck@catch[] <- exp(aperm(array(ca, dim = c(realisations, 
+                                                length(yrs))), perm = c(2, 1)))
+  return(mcstck)
+}
+
+
+monteCarloStock2TMB <- function (stck, tun, sam, realisations,seed_number) 
+{
+    require(doParallel)
+    ctrl <- sam@control
+    if (class(stck) == "FLStocks") {
+        idxStck <- which.max(unlist(lapply(NSHs, function(x) {
+            x@range["maxyear"]
+        })))
+        mcstck <- propagate(stck[[idxStck]], iter = realisations)
+        mcstck <- window(mcstck, start = range(sam)["minyear"], 
+            end = range(sam)["maxyear"])
+        mcstck@stock.n[] <- NA
+        mcstck@harvest[] <- NA
+    }
+    else {
+        mcstck <- propagate(stck, iter = realisations)
+        mcstck <- window(mcstck, start = range(sam)["minyear"], 
+            end = range(sam)["maxyear"])
+        mcstck@stock.n[] <- NA
+        mcstck@harvest[] <- NA
+    }
+    sam@control@simulate <- TRUE
+    sam@control@residuals <- FALSE
+    object <- FLSAM(stck, tun, sam@control, return.fit = T)
+    simdat <- replicate(realisations, c(object$data[names(object$data) != 
+        "logobs"], object$obj$simulate(unlist(object$pl))["logobs"]), 
+        simplify = FALSE)
+    cl <- makeCluster(detectCores() - 1)
+    clusterEvalQ(cl, library(FLSAM))
+    clusterEvalQ(cl, library(stockassessment))
+    registerDoParallel(cl)
+    for (i in 1:realisations) {
+        if (length(which(is.na(object$data$logobs))) > 0) 
+            simdat[[i]]$logobs[which(is.na(object$data$logobs))] <- NA
+    }
+    clusterExport(cl, varlist = c("simdat", "object"), envir = environment())
+    runs <- foreach(i = 1:realisations) %dopar% try(sam.fit(simdat[[i]], 
+        object$conf, defpar(simdat[[i]], object$conf)))
+    stopCluster(cl)
+    for (i in 1:realisations) {
+        if (class(runs[[i]]) != "try-error") {
+            runs[[i]] <- SAM2FLR(runs[[i]], sam@control)
+            mcstck@stock.n[, , , , , i] <- runs[[i]]@stock.n
+            mcstck@harvest[, , , , , i] <- runs[[i]]@harvest
+            mcstck@catch[, , , , , i] <- catch(runs[[i]])$value
+        }
+        
+    pars  <- lapply( runs , function(x) params(x)$value)  
+    random.param <<- matrix(unlist(pars)    , nrow = realisations ,dimnames =list(NULL, params(runs[[1]])$name ))
+    }
+    return(mcstck)
+}
+

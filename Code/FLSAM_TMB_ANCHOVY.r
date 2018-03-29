@@ -119,7 +119,7 @@ sam.ctrl.new                                              <- update(sam.ctrl.new
 ANCHOVY2.sam                                              <- FLSAM(stk,ids,sam.ctrl.new)
 
 ANCHOVY2     <- ANCHOVY + ANCHOVY2.sam
-ANCHOVY2.tun <- ANCHOVY.tun
+ANCHOVY2.tun <- ids
 ANCHOVY2.ctrl<- sam.ctrl.new
 
 save(ANCHOVY2,ANCHOVY2.sam,ANCHOVY2.tun,ANCHOVY2.ctrl ,file ="./Data/ANCHOVY/Anchovy GSA 17-18_tbmSAM.RData" )
