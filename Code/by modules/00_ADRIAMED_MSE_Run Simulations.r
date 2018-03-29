@@ -71,6 +71,7 @@ update.objects <- T
 if (update.objects)
 {
 # Load assessment data
+check.assess <- F
 source('./Code/by modules/01_ADRIAMED_MSE_Load assessment data.r')
 # Set up objects and configuration of the MSE
 source('./Code/by modules/02_ADRIAMED_MSE_Set up objects and configuration.r')
@@ -81,6 +82,7 @@ save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_
 # Define BRPs and Management Scenarios
 load(paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
 source('./Code/by modules/03_ADRIAMED_MSE_BRPs and Scenarios.r')
+save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
 # Save the environment at the start of the simulations
 
 

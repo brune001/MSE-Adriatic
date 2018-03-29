@@ -52,6 +52,9 @@ sam.ctrl                      <- SARDINE.ctrl   }
 #       for (slt in slotNames(sam.ctrl.new))  try( slot(sam.ctrl.new,slt) <- slot(sam.ctrl,slt))
 
 # just a quick check that we can reproduce the assessment
+ 
+if (check.assess)
+{ 
   sam2 <- FLSAM(stk,ids,sam.ctrl)
   plot(ssb(sam2)[,2],ssb(sam)[,2], main="comparison official assessmnet V.S local run")
-
+}

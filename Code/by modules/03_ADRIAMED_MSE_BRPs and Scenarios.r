@@ -69,14 +69,14 @@ Fmsy  <- 0.72
                   flast <- fbar(stoc)[,ac(ylast)] 
                   ftarget <- target$Ftarget 
                   # reduction to apply
-                  perc.red  <- (flast - ftarget ) / (ytarg - ylast) # percentage reduction
-                  mult1 <-   1 - perc.red                       # multiplier to apply in the first year
-                  mult2 <-   1 - 2*perc.red                     # multiplier to apply in the 2nd year, compared to the current F
-                  if(ytarg == (ylast+1)) mult2 <- ftarget/flast         # in case is reached during the intermediate year
+                  step.change  <- (ftarget - flast ) / (ytarg - ylast) # annual reduction
+                  targ1 <-   flast +  step.change                      # Ftarget first year : here we make the assumption in the STF that we applied the same decrease last year. not exactly true, but better than a status quo assumption for the intermediate year
+                  targ2 <-   flast + 2*step.change                     # Ftarget for the advice year
+                  if(ytarg == (ylast+1)) targ2 <- targ1                # in case is reached during the intermediate year
                   # build the target object                  
                   targ<-list()
                   targ$quant = "f"
-                  targ$val = list(y1 = c(flast*mult1) , y2 = c(flast*mult2))
+                  targ$val = list(y1 = c(targ1) , y2 = c(targ2))
                   targ$rel = c(NA,NA)
                   
                   # if we are past the target year to reach Fmsy, just apply a flat Fmsy
@@ -213,7 +213,7 @@ Chistmin <- list( name = "Chistmin" ,
 
 # scenario Catch at 2014 level
 C5red <- list( name = "C5red" ,
-             target = list(prec.red = 0.05, Btarget = Bpa) ,
+             target = list(prec.red = 0.05, Btarget = bpa) ,
              HCR =  HCR.Cred ,
              spatial.closure = F ,
              additionnal.F.reduction = NA

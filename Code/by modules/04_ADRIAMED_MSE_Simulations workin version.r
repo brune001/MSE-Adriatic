@@ -125,7 +125,7 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   ## Short term forecast object 2 years of stk0
   stkTmp <- stf(stk0, 2)
   # project forward with the control you want and the SR rel you defined above, with residuals
-  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=sr, maxF = 5) 
+  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=sr  ,Fmax = 5) 
   
   # update objects storing the basis for the advice
   TAC[,ac(iay+1)] <- catch(stkTmp)[,ac(iay+1)]
