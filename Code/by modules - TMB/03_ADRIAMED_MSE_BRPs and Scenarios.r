@@ -162,6 +162,15 @@ F.msy <- list( name = "F.msy" ,
            )    
 
 
+# scenario Flow :  Ftaret = 0.10
+      # basis Ftarget = try a low F to see how the simulation behave
+      
+F.low <- list( name = "F.low" ,
+             target = list(Ftarget = 0.1) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )    
 
 
 ################################################################################
@@ -211,15 +220,15 @@ Chistmin <- list( name = "Chistmin" ,
 ################################################################################
 #----- scenarios X% annual decrease in the catches untill Bpa is reached ------------------------
 
-# scenario Catch at 2014 level
-C5red <- list( name = "C5red" ,
-             target = list(prec.red = 0.05, Btarget = bpa) ,
-             HCR =  HCR.Cred ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-           )    
-
-
+## scenario Catch at 2014 level
+#C5red <- list( name = "C5red" ,
+#             target = list(prec.red = 0.05, Btarget = bpa) ,
+#             HCR =  HCR.Cred ,
+#             spatial.closure = F ,
+#             additionnal.F.reduction = NA
+#           )    
+#
+#
 
 ################################################################################
 #----- 	GFCM recommendation (2013)  ------------------------
@@ -245,6 +254,6 @@ GFCM.HCR <- list( name = "GFCM.HCR" ,
 # combine them in a list
 
 # management.scenarios <- list(Fsq,Fmsy,Fmsy2020,Fmsy2020,Fmsy2025,C2014 , Chistmin)
-management.scenarios <- list(Fmsy2020)
+management.scenarios <- list(F.low)
 names(management.scenarios) <- lapply (management.scenarios , function(x) x[[1]])
 

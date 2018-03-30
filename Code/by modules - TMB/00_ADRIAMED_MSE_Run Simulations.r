@@ -61,8 +61,8 @@ source('./Code/MSE_funs_LAST.R')
 species <- "ANCHOVY"  # "ANCHOVY" or "SARDINE"
 assess.name <- "Anchovy GSA 17-18_tbmSAM"
 
-number.years.simulated  <- 8
-number.replicates.stock <- 2
+number.years.simulated  <- 10
+number.replicates.stock <- 5
 
 
 
@@ -82,7 +82,7 @@ save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_
 
 # Define BRPs and Management Scenarios
 load(paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
-source('./Code/by modules TMB/03_ADRIAMED_MSE_BRPs and Scenarios.r')
+source('./Code/by modules - TMB/03_ADRIAMED_MSE_BRPs and Scenarios.r')
 save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
 # Save the environment at the start of the simulations
 
@@ -90,7 +90,7 @@ save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_
 
 
 # run the simulation
-source('./Code/by modules/04_ADRIAMED_MSE_Simulations workin version.r')      # load the function go_fish
+source('./Code/by modules - TMB/04_ADRIAMED_MSE_Simulations.r')      # load the function go_fish
 
 lapply(management.scenarios , function(scen) go_fish(scen$name))    # run the simulation for each management scenario
 

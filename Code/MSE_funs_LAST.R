@@ -90,6 +90,9 @@ make.arma.resid <- function(arima.fit, age, years, nit){
 
 
 make.arma.resid.lst <- function(arima.fit.list, age, years){
+
+#    arima.fit.list= arima.fit.lst ;  age= 0 ; years= arima.fit.list
+
   ##----------------------------
   ## simulate structured recruitment residuals on log-scale
   ## fseparately for each iteration of the stock
@@ -132,6 +135,16 @@ make.arma.resid.lst <- function(arima.fit.list, age, years){
                    dimnames = list(year = years, age = age, iter = 1:nit))  
   return(srDev)
 }
+
+
+
+
+
+
+
+
+
+
 
 need.it <- F
 

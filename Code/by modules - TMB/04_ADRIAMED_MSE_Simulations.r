@@ -89,16 +89,27 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
 
 #### DO THE ASSESSMENT FOR EACH ITERATION SUCCESIVELY  AND UPDATE THE PERCIEVED STOCK
   sam0.ctrl <- sam.ctrl
-  sam0.ctrl@nohess <- T
   sam0.ctrl@range["maxyear"]  <- iay-1
 
-  for (its in 1:it)
-    {
-    idx0its <- FLIndices(lapply(idx0 , function(x) iter(x,its)))
-    sam0its <- FLSAM(iter(stk0,its), idx0its , sam0.ctrl)
-    iter(stk0,its) <- iter(stk0,its) + sam0its
-    }
-
+  if (iay == iy) 
+      {
+      res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,return.sam=T)
+      for(i in 1:it)
+        {
+        stk0@harvest <- res[[i]]@harvest
+        stk0@stock.n <- res[[i]]@stock.n
+        }
+       }
+  
+  if (iay > iy) 
+      { 
+      res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,starting.sam=res,return.sam=T)
+      for(i in 1:it)
+        {
+        stk0@harvest <- res[[i]]@harvest
+        stk0@stock.n <- res[[i]]@stock.n
+        }
+      }
 
 
 ### STF ON THE PERCIEVED STOCK TO PRODUCE AND ADVICE
@@ -145,11 +156,11 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
  ctrlOM <- fwdControl(data.frame(year=c(iay), quantity=c('catch'), val=c(iterMeans(TAC[,ac(iay)])@.Data)))
  ctrlOM@trgtArray <- arr0
  # update pstk with stkTmp
- pstk <- fwd(pstk, ctrl=ctrlOM, sr=sr, sr.residuals = exp(sr.res[,ac(iay)]), sr.residuals.mult = TRUE) #
-
+ pstk <- fwd(pstk, ctrl=ctrlOM, sr=sr, sr.residuals = exp(sr.res[,ac(iay)]), sr.residuals.mult = TRUE , Fmax = 5) #
 }  # end of year loops
 
 
+res <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC)
 
-save(pstk,stk0,Fad,SSBad,TAC,file = paste0("./Results/",species,"/simres/",sc,".RData"))
+save(res,file = paste0("./Results/",species,"/simres/",sc,".RData"))
 }
