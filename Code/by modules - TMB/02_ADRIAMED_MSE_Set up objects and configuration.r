@@ -48,7 +48,7 @@ nsqy <- 3                           # number of SQ years upon which to average r
 # 2 : Create stock object & use vcov for new realisations
 #-------------------------------------------------------------------------------
 
-sstk                            <- monteCarloStock2TMB ( stk , ids , sam , it , seed_number=floor(pi*10000))
+sstk                            <- monteCarloStock2TMB ( stk , ids , sam , it)
 save(random.param,file= paste0("./Results/",species,"/random.param.RData"))    # location where the model parameters for the nits replicates will be stored
 
 

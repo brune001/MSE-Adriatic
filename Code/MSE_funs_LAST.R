@@ -444,7 +444,7 @@ function (stck, sam, realisations,seed_number)
   return(mcstck)
 }
 
-monteCarloStock3 <- function (stck, sam, realisations,seed_number) 
+monteCarloStock3 <- function (stck ,tun,sam, realisations,seed_number) 
 {
   require(MASS)
   ctrl <- sam@control
@@ -455,6 +455,19 @@ monteCarloStock3 <- function (stck, sam, realisations,seed_number)
   set.seed(seed_number)
   random.param <<- mvrnorm(realisations, sam@params$value[is.element(sam@params$name,colnames(sam@vcov))], sam@vcov)
   #save(random.param, file = file.path(run.dir, "random.param.RData"))
+  
+  
+  
+  sam2<-sam
+  sam2@params$value[is.element(sam2@params$name,colnames(sam2@vcov))] <-    random.param[1,]
+  sam3 <-  FLSAM(stck , tun , sam@control , pin.sam = sam2 ,use.pin = T)
+  
+  
+  
+  
+  
+  
+  
   n.states <- length(unique(ctrl@states[names(which(ctrl@fleets == 
                                                       0)), ]))
   yrs <- dims(sam)$minyear:dims(sam)$maxyear
@@ -477,7 +490,7 @@ monteCarloStock3 <- function (stck, sam, realisations,seed_number)
 }
 
 
-monteCarloStock2TMB <- function (stck, tun, sam, realisations,seed_number) 
+monteCarloStock2TMB <- function (stck, tun, sam, realisations) 
 {
     require(doParallel)
     ctrl <- sam@control
@@ -524,9 +537,12 @@ monteCarloStock2TMB <- function (stck, tun, sam, realisations,seed_number)
             mcstck@catch[, , , , , i] <- catch(runs[[i]])$value
         }
         
+      }
+    
     pars  <- lapply( runs , function(x) params(x)$value)  
     random.param <<- matrix(unlist(pars)    , nrow = realisations ,dimnames =list(NULL, params(runs[[1]])$name ))
-    }
+
+    
     return(mcstck)
 }
 

@@ -120,6 +120,8 @@ ANCHOVY2.ctrl<- sam.ctrl.new
 
 save(ANCHOVY2,ANCHOVY2.sam,ANCHOVY2.tun,ANCHOVY2.ctrl ,file ="./Data/ANCHOVY/Anchovy GSA 17-18_tbmSAM.RData" )
 
+sstk <- monteCarloStock ( ANCHOVY2 , ANCHOVY2.tun , ANCHOVY2.sam , 2 )
+
 #- Impact matrix
 #- obs.var -> failure
 #- logN -> failure
