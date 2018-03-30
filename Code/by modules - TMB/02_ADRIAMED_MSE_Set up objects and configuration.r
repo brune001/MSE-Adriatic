@@ -48,7 +48,7 @@ nsqy <- 3                           # number of SQ years upon which to average r
 # 2 : Create stock object & use vcov for new realisations
 #-------------------------------------------------------------------------------
 
-sstk                            <- monteCarloStock2TMB ( stk , ids , sam , it)
+sstk                            <- monteCarloStockTMB ( stk , ids , sam , it)
 save(random.param,file= paste0("./Results/",species,"/random.param.RData"))    # location where the model parameters for the nits replicates will be stored
 
 
@@ -214,8 +214,17 @@ load(paste0("./RESULTS/",species,"/random.param.RData"))  #getting object random
 
 logQ        <- random.param[,colnames(random.param)=="logFpar"]
 logSdObs    <- random.param[,colnames(random.param)=="logSdLogObs"]
-logQSsb     <- random.param[,colnames(random.param)=="logScaleSSB"]
-logSdObsSsb <- random.param[,colnames(random.param)=="logSdSSB"]
+
+
+# check that the configuration is accoring to the convention used to write this script
+Q<-unique(c(sam.ctrl@catchabilities ))
+Q<-Q[Q>=0]
+if(  max(Q)>(min(Q)+(length(Q)-1)))  stop("sorry, for this script to work, values in sam.ctrl@catchabilities must start from 0, increment by 1 and end at the number of parameters minus 1")
+O<-unique(c(sam.ctrl@obs.vars ))
+O<-O[O>=0]
+if( max(O)>(min(O)+(length(O)-1)))  stop("sorry, for this script to work, values in sam.ctrl@obs.vars must start from 0, increment by 1 and end at the number of parameters minus 1")
+
+
 
 # multiplying the number of iterations in the indices and expanding the time frame
 for (i in 1:length(ids)) name(ids[[i]]) <- names(ids)[i]
@@ -232,46 +241,35 @@ idx <- lapply(ids,function(x)
       fleet.type <- sam.ctrl@fleets[n.]
      
       # fill in the catchability slot and index deviations for age structured surveys
-      if (fleet.type == 2 )
-      {
-      agesQ     <-  names(sam.ctrl@catchabilities[n.,]) [!is.na(sam.ctrl@catchabilities[n.,])]
-      agesSdObs <-  names(sam.ctrl@obs.vars[n.,]) [!is.na(sam.ctrl@obs.vars[n.,])]
+     
+      agesQ     <-  names(sam.ctrl@catchabilities[n.,]) [!is.na(sam.ctrl@catchabilities[n.,]) & sam.ctrl@catchabilities[n.,]!= -1]
+      agesSdObs <-  names(sam.ctrl@obs.vars[n.,]) [!is.na(sam.ctrl@obs.vars[n.,]) & sam.ctrl@obs.vars[n.,] != -1]
+      
+      agesQq <- agesQ
+      agesSdObsq  <-  agesSdObs
+      
+      if (fleet.type == 3 )    agesQq <-  agesSdObsq  <- "all"
       
       for (its in 1:it) 
           {
           # each iteration the estimated catchability in the slot index.q for each survey :
-          iter( index.q(x)[agesQ,]   , its )     <- FLQuant( matrix(rep(exp(logQ[its,sam.ctrl@catchabilities[n.,agesQ]]),dim(index.q(x)[agesQ,])[2]),nrow = dim(index.q(x)[agesQ,])[1]), dimnames = dimnames(iter( index.q(x)[agesQ,] , its )))
+          iter( index.q(x)[agesQq,]   , its )     <- FLQuant( matrix(rep(exp(logQ[its,c(1+sam.ctrl@catchabilities[n.,agesQ])]),dim(index.q(x)[agesQq,])[2]),nrow = dim(index.q(x)[agesQq,])[1]), dimnames = dimnames(iter( index.q(x)[agesQq,] , its )))
           #  the observation SD in the slot index.var
-          idx.dev<- FLQuant( matrix(rep(exp(logSdObs[its,sam.ctrl@obs.vars[n.,agesSdObs]]),dim(index.var(x)[agesSdObs,])[2]),nrow = dim(index.var(x)[agesSdObs,])[1]), dimnames = dimnames(iter( index.var(x)[agesSdObs,] , its )))
+          idx.dev<- FLQuant( matrix(rep(exp(logSdObs[its,(sam.ctrl@obs.vars[n.,agesSdObs]+1)]),dim(index.var(x)[agesSdObsq,])[2]),nrow = dim(index.var(x)[agesSdObsq,])[1]), dimnames = dimnames(iter( index.var(x)[agesSdObsq,] , its )))
           # we want to replace that by actual deviations that we can just multiply by the modeled index
-          iter( index.var(x)[agesSdObs,] , its )  <-  exp(apply(idx.dev , c(1,2) , function (x) rnorm(1,0,x)))
+          iter( index.var(x)[agesSdObsq,] , its )  <-  exp(apply(idx.dev , c(1,2) , function (x) rnorm(1,0,x)))
           # we don't want to apply a deviation on the historical data, so impose a value of 1
-          index.var(x)[agesSdObs,ac(y0idx:ay),,,,its]   <- 1
-          }
-      }
-      
-      
-      # fill in the catchability slot and index deviations  for SSB surveys
-      if (fleet.type == 3 )
-      {
-      for (its in 1:it) 
-          {
-# each iteration the estimated catchability in the slot index.q for each survey :
-          iter( index.q(x)  , its )  <- FLQuant( matrix(rep(exp(logQSsb[its]),dim(index.q(x))[2]),nrow = dim(index.q(x))[1]), dimnames = dimnames(iter( index.q(x) , its )))
-#  the observation SD in the slot index.var
-          idx.dev <- FLQuant( matrix(rep(exp(logSdObs[its]),dim(index.var(x))[2]),nrow = dim(index.var(x))[1]), dimnames = dimnames(iter( index.var(x) , its )))
-          # we want to replace that by actual deviations that we can just multiply by the modeled index          
-          iter( index.var(x) , its ) <-   exp(apply(idx.dev , c(1,2) , function (x) rnorm(1,0,x)))
-          # we don't want to apply a deviation on the historical data, so impose a value of 1
-          index.var(x)[,ac(y0idx:ay),,,,its]   <- 1
+          index.var(x)[agesSdObsq,ac(y0idx:ay),,,,its]   <- 1
           
+      
+
 ############ this is how it should be done if the survey was to be continued in the future, but apparently, this SSB survey stopped after 2012,
 # so replace all the above by NAs          
-          index.var(x)[,ac(iy:fy),,,,its]   <- NA  # so that we generate NAs in the future ,
+          if (fleet.type == 3 ) index.var(x)[,ac(iy:fy),,,,its]   <- NA  # so that we generate NAs in the future ,
                                                    # we could just not include this survey in the part where new index values are generate (loops),
                                                    # but in case one day this survey constinue, maybe it is better to keep it in the framework.         
           }
-      }    
+          
        
     return(x)  
       })
@@ -281,12 +279,12 @@ idx <- lapply(ids,function(x)
 
 
 ## similarly generate a future errors for the catch matrix, deviations to be use as multipliers
-      agesSdObs <-  names(sam.ctrl@obs.vars["catch",]) [!is.na(sam.ctrl@obs.vars["catch",])]
+      agesSdObs <-  names(sam.ctrl@obs.vars["catch unique",]) [!is.na(sam.ctrl@obs.vars["catch unique",]) & sam.ctrl@obs.vars["catch unique",]!= -1]
       catch.dev <- window(catch.n(sstk) , start=range(sstk)["minyear"],end=fy)
 
       for (its in 1:it) 
         {
-        cdev <- matrix(rep(logSdObs[its,sam.ctrl@obs.vars["catch",agesSdObs]],dim(catch.dev)[2]),nrow = dim(catch.dev)[1])
+        cdev <- matrix(rep(logSdObs[its,c(1+sam.ctrl@obs.vars["catch unique",agesSdObs])],dim(catch.dev)[2]),nrow = dim(catch.dev)[1])
         cdev <- exp(cdev)
         cdev <- FLQuant(cdev, dimnames = dimnames(iter( catch.dev , its )))
         cdev <- apply(cdev , c(1,2) , function (x) rnorm(1,0,x))

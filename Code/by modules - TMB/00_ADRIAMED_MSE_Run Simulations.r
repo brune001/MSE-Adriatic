@@ -17,7 +17,8 @@
 # Scenario numbers in brackets are equivalent to scenario numbers in the report
 #
 #
-#   NEW VERSION  MARCH 2018 : Thomas BRUNEL (WMR)
+#   NEW VERSION  MARCH 2018 : Thomas BRUNEL and Niels HINTZEN (WMR)
+
 #   SAM is fully integrated (assessment in the loop, uncertainty on starting conditions and model parameters incorporated in the OM)
 #   now presented in different modules to facilitate implementation
 #
@@ -27,7 +28,6 @@
 # libraries 
 #==============================================================================
 rm(list=ls())
-library(FLa4a)
 library(FLash)
 library(FLasher)
 library(FLAssess)
@@ -61,7 +61,7 @@ source('./Code/MSE_funs_LAST.R')
 species <- "ANCHOVY"  # "ANCHOVY" or "SARDINE"
 assess.name <- "Anchovy GSA 17-18_tbmSAM"
 
-number.years.simulated  <- 5
+number.years.simulated  <- 8
 number.replicates.stock <- 2
 
 
@@ -73,9 +73,9 @@ if (update.objects)
 {
 # Load assessment data
 check.assess <- F
-source('./Code/by modules TMB/01_ADRIAMED_MSE_Load assessment data.r')
+source('./Code/by modules - TMB/01_ADRIAMED_MSE_Load assessment data.r')
 # Set up objects and configuration of the MSE
-source('./Code/by modules TMB/02_ADRIAMED_MSE_Set up objects and configuration.r')
+source('./Code/by modules - TMB/02_ADRIAMED_MSE_Set up objects and configuration.r')
 save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
 }
 

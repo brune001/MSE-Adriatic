@@ -411,6 +411,8 @@ environment(hcr.allF) <- environment(hcr)
 # modified mcmc function to resample stock from the SAM assessment.   Thomas Brunel 2018
 #-----------------------------------------------------------------------------------------------------------
     
+# modified ADMB FLSAM's monteCarloStock function to get it to output the parameters    
+    
 monteCarloStock2 <- 
 function (stck, sam, realisations,seed_number) 
 {
@@ -444,54 +446,15 @@ function (stck, sam, realisations,seed_number)
   return(mcstck)
 }
 
-monteCarloStock3 <- function (stck ,tun,sam, realisations,seed_number) 
-{
-  require(MASS)
-  ctrl <- sam@control
-  mcstck <- propagate(stck, iter = realisations)
-  mcstck <- window(mcstck, start = range(sam)["minyear"], end = range(sam)["maxyear"])
-  mcstck@stock.n[] <- NA
-  mcstck@harvest[] <- NA
-  set.seed(seed_number)
-  random.param <<- mvrnorm(realisations, sam@params$value[is.element(sam@params$name,colnames(sam@vcov))], sam@vcov)
-  #save(random.param, file = file.path(run.dir, "random.param.RData"))
-  
-  
-  
-  sam2<-sam
-  sam2@params$value[is.element(sam2@params$name,colnames(sam2@vcov))] <-    random.param[1,]
-  sam3 <-  FLSAM(stck , tun , sam@control , pin.sam = sam2 ,use.pin = T)
-  
-  
-  
-  
-  
-  
-  
-  n.states <- length(unique(ctrl@states[names(which(ctrl@fleets == 
-                                                      0)), ]))
-  yrs <- dims(sam)$minyear:dims(sam)$maxyear
-  ages <- dims(sam)$age
-  u <- random.param[, which(colnames(random.param) == "U")]
-  ca <- random.param[, which(colnames(random.param) == "logCatch")]
-  idxNs <- c(mapply(seq, from = seq(1, ncol(u), ages + n.states), 
-                    to = seq(1, ncol(u), ages + n.states) + ages - 1, by = 1))
-  idxFs <- c(mapply(seq, from = seq(1, ncol(u), ages + n.states) + 
-                      ages, to = seq(1, ncol(u), ages + n.states) + n.states + 
-                      ages - 1, by = 1))
-  mcstck@stock.n[] <- exp(aperm(array(u[, idxNs], dim = c(realisations, 
-                                                          ages, length(yrs))), perm = c(2, 3, 1)))
-  mcstck@harvest[] <- exp(aperm(array(u[, idxFs], dim = c(realisations, 
-                                                          n.states, length(yrs))), perm = c(2, 3, 1)))[ctrl@states[names(which(ctrl@fleets == 
-                                                                                                                                 0)), ], , ]
-  mcstck@catch[] <- exp(aperm(array(ca, dim = c(realisations, 
-                                                length(yrs))), perm = c(2, 1)))
-  return(mcstck)
-}
 
+# modified the TMB new FLSAM's monteCarloStock function to get it to output the parameters    
 
-monteCarloStock2TMB <- function (stck, tun, sam, realisations) 
+monteCarloStockTMB <-
+function (stck, tun, sam, realisations, return.sam = FALSE, ...) 
 {
+    
+#    stck <- ANCHOVY2 ; tun  <- ANCHOVY2.tun   ;  sam  <- ANCHOVY2.sam;    realisations <- 2
+    
     require(doParallel)
     ctrl <- sam@control
     if (class(stck) == "FLStocks") {
@@ -517,7 +480,9 @@ monteCarloStock2TMB <- function (stck, tun, sam, realisations)
     simdat <- replicate(realisations, c(object$data[names(object$data) != 
         "logobs"], object$obj$simulate(unlist(object$pl))["logobs"]), 
         simplify = FALSE)
-    cl <- makeCluster(detectCores() - 1)
+    ncores <- detectCores() - 1
+    ncores <- ifelse(realisations < ncores, realisations, ncores)
+    cl <- makeCluster(ncores)
     clusterEvalQ(cl, library(FLSAM))
     clusterEvalQ(cl, library(stockassessment))
     registerDoParallel(cl)
@@ -525,24 +490,46 @@ monteCarloStock2TMB <- function (stck, tun, sam, realisations)
         if (length(which(is.na(object$data$logobs))) > 0) 
             simdat[[i]]$logobs[which(is.na(object$data$logobs))] <- NA
     }
-    clusterExport(cl, varlist = c("simdat", "object"), envir = environment())
-    runs <- foreach(i = 1:realisations) %dopar% try(sam.fit(simdat[[i]], 
-        object$conf, defpar(simdat[[i]], object$conf)))
+    runs <- foreach(i = 1:realisations) %dopar% try(sam.fitfast(simdat[[i]], 
+        object$conf, object$pl, silent = T, ...))
     stopCluster(cl)
-    for (i in 1:realisations) {
-        if (class(runs[[i]]) != "try-error") {
-            runs[[i]] <- SAM2FLR(runs[[i]], sam@control)
-            mcstck@stock.n[, , , , , i] <- runs[[i]]@stock.n
-            mcstck@harvest[, , , , , i] <- runs[[i]]@harvest
-            mcstck@catch[, , , , , i] <- catch(runs[[i]])$value
+    if (return.sam) {
+        resSAM <- list()
+        for (i in 1:realisations) {
+            if (!is.na(unlist(res[[i]]$sdrep)[1])) {
+                resSAM[[i]] <- SAM2FLR(res[[i]], sam@control)
+            }
+            else {
+                resSAM[[i]] <- NA
+            }
         }
-        
-      }
+        resSAM <- as(resSAM, "FLSAMs")
+    }
+    if ("doParallel" %in% (.packages())) 
+        detach("package:doParallel", unload = TRUE)
+    if ("foreach" %in% (.packages())) 
+        detach("package:foreach", unload = TRUE)
+    if ("iterators" %in% (.packages())) 
+        detach("package:iterators", unload = TRUE)
+    if (!return.sam) {
+        samRuns <- list()
+        for (i in 1:realisations) {
+            if (!is.na(unlist(runs[[i]]$sdrep)[1])) {
+                samRuns[[i]] <- SAM2FLR(runs[[i]], sam@control)
+                mcstck@stock.n[, , , , , i] <- samRuns[[i]]@stock.n
+                mcstck@harvest[, , , , , i] <- samRuns[[i]]@harvest
+            }
+        }
+    }
+   
     
-    pars  <- lapply( runs , function(x) params(x)$value)  
-    random.param <<- matrix(unlist(pars)    , nrow = realisations ,dimnames =list(NULL, params(runs[[1]])$name ))
-
+   pars  <- lapply( samRuns , function(x) params(x)$value)  
+   random.param <<- matrix(unlist(pars)    , byrow= T, nrow = realisations ,dimnames =list(NULL, params(samRuns[[1]])$name ))
     
-    return(mcstck)
+    
+    if (return.sam) 
+        ret <- resSAM
+    if (!return.sam) 
+        ret <- mcstck
+    return(ret)
 }
-

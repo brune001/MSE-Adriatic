@@ -32,14 +32,14 @@ if (species == "ANCHOVY")
 {
 blim  <- 45936
 bpa   <- blim*2
-Fmsy  <- 0.55                                                   
+Fmsy  <- 0.64                                                   
 }
 
 if (species == "SARDINE")
 {
 blim  <- 125318
 bpa   <- blim*2
-Fmsy  <- 0.72                                                   
+Fmsy  <- 0.47                                                   
 }
 
 
