@@ -254,6 +254,6 @@ GFCM.HCR <- list( name = "GFCM.HCR" ,
 # combine them in a list
 
 # management.scenarios <- list(Fsq,Fmsy,Fmsy2020,Fmsy2020,Fmsy2025,C2014 , Chistmin)
-management.scenarios <- list(F.low)
+management.scenarios <- list(F.low,F.msy,F.sq)
 names(management.scenarios) <- lapply (management.scenarios , function(x) x[[1]])
 

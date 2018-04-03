@@ -162,5 +162,5 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
 
 res <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC)
 
-save(res,file = paste0("./Results/",species,"/simres/",sc,".RData"))
+save(res,file = paste0("./Results/",species,"/simres/",sc,"_",it"its_",fy,".RData"))
 }

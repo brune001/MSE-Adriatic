@@ -72,9 +72,9 @@ for (its in 1:it)  iter(params(sr),its) <- params(fmle(as.FLSR(iter(sstk,its), m
 
 
 # calculate residuals of the fit and look
-plot(sr)
+#plot(sr)
 sr.res <- residuals(sr)
-plot(sr.res)
+#plot(sr.res)
 
 
 # THIS IS MODIFIED SO THAT AN ARIMA MODEL IS FITTED FOR THE RESIDUALS OF EACH ITERATION
@@ -91,11 +91,16 @@ arima.fit.lst <- lapply(as.list(dimnames(rec(sr))$iter) ,  function(its) {arima(
 
 # create autocorrelation in residuals and propagate throughout stock into the future
 # from initial year of projections (iy) to last of projections (ny-1)
-sr.res <- make.arma.resid.lst(arima.fit.lst, age = 0, years = iy:(iy + ny-1))
-plot(sr.res)
+sr.res <- make.arma.resid.lst(arima.fit.lst, age = 0, years = iy:(iy + ny-1) , rec.res)
 
-
-
+# for plotting
+pl.res <- window(residuals(sr),end = iy+ny-1 )
+pl.res[,ac(iy:(iy + ny-1))] <- sr.res
+pl.res <- exp(pl.res)
+pl.res <- pl.res[,,,,,1:5]
+png(paste0("Results/",species,"/PLOTS/recruiment deviations.png"), width=700, height=700)
+print(ggplot(pl.res, aes (x=year , y =data, colour = iter) ) + geom_line() +ggtitle("ARIMA recruitment deviations by iteration") + geom_vline(xintercept = iy-1)    +  geom_hline(yintercept = 1) )
+dev.off()
 
 # WITHOUT AUTOCORRELATION:
 ##sr.res1[] <- sample(c(residuals(sr)), ny*it, replace=TRUE)

@@ -564,3 +564,81 @@ function (stck, tun, sam, realisations, return.sam = FALSE, ...)
         ret <- mcstck
     return(ret)
 }
+
+
+
+############################################################################################################
+# plotting functions
+############################################################################################################
+
+# stock trends with iterations
+
+plot.iStk <- function(Stk,nits,title)
+{
+p <- plot(Stk)
+Rec  <- data.frame(as.data.frame(iter(rec(Stk), c(1:nits))) , qname = "Rec")
+SSB  <- data.frame(as.data.frame(iter(ssb(Stk), c(1:nits))) , qname = "SSB")
+Catch  <- data.frame(as.data.frame(iter(catch(Stk), c(1:nits))) , qname = "Catch")
+Harvest  <- data.frame(as.data.frame(iter(fbar(Stk), c(1:nits))) , qname = "F")
+
+fds <- do.call (rbind ,list(Rec,SSB,Catch,Harvest))
+fds <- fds[fds$year >2000,]
+
+p<- p + geom_line(data=fds, aes(year, data, group=iter), size=0.5 ,colour = "grey50")  + ggtitle(title) +geom_vline(xintercept = iy-1)
+
+print(p)
+}
+
+
+
+# FLquant trends with iterations
+
+
+plot.iQuant <- function(quant,nits,title)
+{
+p <- plot(quant)
+fds  <- data.frame(as.data.frame(iter(quant, c(1:nits))) , qname = "quant")
+fds <- fds[fds$year >2000,]
+p<- p + geom_line(data=fds, aes(year, data, group=iter), size=0.5 ,colour = "grey50")  + ggtitle(title) +geom_vline(xintercept = iy-1)
+print(p)
+}
+
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+
+
