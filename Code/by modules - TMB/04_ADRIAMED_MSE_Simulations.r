@@ -7,12 +7,13 @@ go_fish <- function(sc)
  
  
 load(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
-# sc <- "Fmsy"
+ # sc <- "Fmsy"
  # sc <- "Fmsy2025"
  # sc <- "C2014"
  # sc <- "Chistmin"
  # sc <- "C5red"
  # sc <- "GFCM.HCR" 
+ # sc <- "Bpa.Fmsy2020"
 
 
 # define the management options for this scenario

@@ -115,6 +115,12 @@ Fmsy  <- 0.47
                   targ$quant = "catch"
                   targ$val = list(y1 = c(cref)*(1-red)^(ny-1) , y2 = c(cref)*(1-red)^(ny) )
                   targ$rel = c(NA,NA)
+
+                  # don't knowhow to apply the constraint here because
+                  # it would involved switching HCR for part of the iersations only and I don't know how to 
+                  # set up a control object with catch constraint for some iters 
+                  # and F constrain for other iters
+
                   return(targ)                 
                   }
  
@@ -172,7 +178,61 @@ HCR.gfcm.modified <- function(stoc, target)
                   return(targ)
                   } 
                   
+
+
+
+# to first go immediately to Bpa (first simulation year) and then slowly increase F towards Fmsy in yr
+HCR.Bpa.Fmsy<- function(stoc, target)
+                  {
+                  # define time and F 
+                  ystart  <- ay+1                      # first simulation year
+                  ylast   <- range(stoc)["maxyear"]    # last assessment year in the current loop
+                  ynow    <- ylast + 1                 # current simulation year
+                  ytarg   <- target[["Yr.targ"]]       # time target to be at Ftarget
+                  flast   <- fbar(stoc)[,ac(ylast)]    # F in the last assessment year in the current loop
+                  ftarget <- target$Ftarget 
+                  btarget <- target$Btarget 
                   
+                  # first target is Btarget in the first year
+                  if(ynow  == ystart) {
+                                      targ<-list()
+                                      targ$quant = c("catch","ssb")
+                                      targ$val = list(y1 = c(catch(stoc)[,"2014"]) , y2 = c(btarget))
+                                      targ$rel = c(NA,NA)
+                                      } else        #### had to add this for the second year because Bpa could not be reach in the first year for ANCHOVY
+                                      {
+                                      if(ynow  == ystart+1) 
+                                            {targ<-list()
+                                            targ$quant = c("catch","ssb")
+                                            targ$val = list(y1 = c(0) , y2 = c(btarget))
+                                            targ$rel = c(NA,NA)
+                                            } else
+                                            {  
+                                            # reduction to apply
+                                            step.change  <- (ftarget - flast ) / (ytarg - ylast) # annual reduction
+                                            targ1 <-   flast +  step.change                      # Ftarget first year : here we make the assumption in the STF that we applied the same decrease last year. not exactly true, but better than a status quo assumption for the intermediate year
+                                            targ2 <-   flast + 2*step.change                     # Ftarget for the advice year
+                                            if(ytarg == (ylast+1)) targ2 <- targ1                # in case is reached during the intermediate year
+                                            # build the target object                  
+                                            targ<-list()
+                                            targ$quant = "f"
+                                            targ$val = list(y1 = c(targ1) , y2 = c(targ2))
+                                            targ$rel = c(NA,NA)
+                                            
+                                            # if we are past the target year to reach Fmsy, just apply a flat HCR.gfcm.modified
+                                            if(ylast>=ytarg) 
+                                                {
+                                                targetbis  <- list(Fmax = Fmsy , Btrig = mean(c(bpa,blim)))
+                                                targ <- HCR.gfcm.modified (stoc, targetbis)
+                                                } 
+                                            }
+                                      }
+                  return(targ)
+                  }                  
+                  
+
+
+
 ################################################################################
 # define scenarios 1 by 1 
 ################################################################################
@@ -286,16 +346,25 @@ GFCM.HCR <- list( name = "GFCM.HCR" ,
            )    
 
 
-GFCM.HCR.modif <- list( name = "GFCM.HCR.modified" ,
+GFCM.HCR.modif <- list( name = "GFCM.HCR.modif" ,
              target = list(Fmax = Fmsy , Btrig = mean(c(bpa,blim))) ,
-             HCR =  HCR.gfcm ,
+             HCR =  HCR.gfcm.modified ,
              spatial.closure = F ,
              additionnal.F.reduction = NA
            )  
 
 
 
+################################################################################
+#----- 	Bpa objective for 2018 and Fmsy for 2020  ------------------------
 
+
+Bpa.Fmsy2020 <- list( name= "Bpa.Fmsy2020",
+                      target =  list(Yr.targ = 2020 , Ftarget = Fmsy , Btarget = bpa),
+                      HCR = HCR.Bpa.Fmsy ,
+                      spatial.closure = F ,
+                      additionnal.F.reduction = NA
+                     ) 
 
 
 ########################################
@@ -305,7 +374,8 @@ management.scenarios <- list( F.sq,F.msy,F.low,
                               Fmsy2020,Fmsy2025,  
                               C2014 , Chistmin,
                               C5red, 
-                              GFCM.HCR, GFCM.HCR.modif)
+                              GFCM.HCR, GFCM.HCR.modif,
+                              Bpa.Fmsy2020)
                               
 names(management.scenarios) <- lapply (management.scenarios , function(x) x[[1]])
 
