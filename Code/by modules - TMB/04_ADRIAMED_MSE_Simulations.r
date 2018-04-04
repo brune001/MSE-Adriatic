@@ -1,17 +1,18 @@
 
 go_fish <- function(sc)                
 {
- # sc <- "Fmsy"
- # sc <- "Fmsy2020"
- # sc <- "C2014"
- # sc <- "Chistmin"
- # sc <- "GFCM.HCR" 
+ 
  
  
  
  
 load(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
-
+# sc <- "Fmsy"
+ # sc <- "Fmsy2025"
+ # sc <- "C2014"
+ # sc <- "Chistmin"
+ # sc <- "C5red"
+ # sc <- "GFCM.HCR" 
 
 
 # define the management options for this scenario
@@ -91,25 +92,15 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   sam0.ctrl <- sam.ctrl
   sam0.ctrl@range["maxyear"]  <- iay-1
 
-  if (iay == iy) 
-      {
-      res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,return.sam=T)
-      for(i in 1:it)
-        {
-        stk0@harvest <- res[[i]]@harvest
-        stk0@stock.n <- res[[i]]@stock.n
-        }
-       }
+  if (iay == iy)  res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,return.sam=T)
+  if (iay > iy)   res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,starting.sam=res,return.sam=T)
   
-  if (iay > iy) 
-      { 
-      res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,starting.sam=res,return.sam=T)
-      for(i in 1:it)
+    for(ii in 1:it)
         {
-        stk0@harvest <- res[[i]]@harvest
-        stk0@stock.n <- res[[i]]@stock.n
+        iter(stk0@harvest,ii) <- res[[ii]]@harvest
+        iter(stk0@stock.n,ii) <- res[[ii]]@stock.n
         }
-      }
+      
 
 
 ### STF ON THE PERCIEVED STOCK TO PRODUCE AND ADVICE
@@ -136,7 +127,7 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   ## Short term forecast object 2 years of stk0
   stkTmp <- stf(stk0, 2)
   # project forward with the control you want and the SR rel you defined above, with residuals
-  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=sr  ,Fmax = 5) 
+  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=sr  ,maxF = 10) 
   
   # update objects storing the basis for the advice
   TAC[,ac(iay+1)] <- catch(stkTmp)[,ac(iay+1)]
@@ -156,11 +147,11 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
  ctrlOM <- fwdControl(data.frame(year=c(iay), quantity=c('catch'), val=c(iterMeans(TAC[,ac(iay)])@.Data)))
  ctrlOM@trgtArray <- arr0
  # update pstk with stkTmp
- pstk <- fwd(pstk, ctrl=ctrlOM, sr=sr, sr.residuals = exp(sr.res[,ac(iay)]), sr.residuals.mult = TRUE , Fmax = 5) #
+ pstk <- fwd(pstk, ctrl=ctrlOM, sr=sr, sr.residuals = exp(sr.res[,ac(iay)]), sr.residuals.mult = TRUE , maxF = 10) #
 }  # end of year loops
 
 
 res <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC)
 
-save(res,file = paste0("./Results/",species,"/simres/",sc,"_",it"its_",fy,".RData"))
+save(res,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,".RData"))
 }

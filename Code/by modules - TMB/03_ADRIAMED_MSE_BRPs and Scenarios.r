@@ -1,5 +1,16 @@
 ###############################################################################
-# 
+#
+#   NEW VERSION  MARCH/APRIL 2018 : Thomas BRUNEL and Niels HINTZEN (WMR)
+#
+#   SAM is fully integrated (assessment in the loop, uncertainty on starting conditions and model parameters incorporated in the OM)
+#   now presented in different modules to facilitate implementation
+#
+###############################################################################
+
+# developped from
+
+###############################################################################
+#   
 #EJ(20150119)
 # Tests on the evaluation of the NS-MAP using COD
 # NOTE1: The final analysis is in the report file.
@@ -13,14 +24,6 @@
 # February/MARCH 2017
 # Updated for 2017 GFCM WKMSE, using WGSAD2016 assessment data (last year=dy=2015)
 # FINAL VERSION UPLOADED ONTO GFCM SERVER
-#
-# Scenario numbers in brackets are equivalent to scenario numbers in the report
-#
-#
-#   NEW VERSION  MARCH 2018 : Thomas BRUNEL (WMR)
-#   SAM is fully integrated (assessment in the loop, uncertainty on starting conditions and model parameters incorporated in the OM)
-#
-###############################################################################
 
 
 ################################################################################
@@ -95,7 +98,25 @@ Fmsy  <- 0.47
                   targ$rel = c(NA,NA)
                   return(targ)
                   }
+
+
+# to apply an annual X% decrease in the catches until B>=Bpa & F<=Fmsy
+ HCR.Cred <- function(stoc, target)
+                  {     
+                  red <- target$prec.red
+                  btarg<-target$Btarget
+                  cref <- catch(stoc)[,ac(2014)]
+                  yref    <- ay
+                  yad   <- range(stoc)["maxyear"]+2
+                  ny<-yad-yref
                   
+                   
+                  targ<-list()
+                  targ$quant = "catch"
+                  targ$val = list(y1 = c(cref)*(1-red)^(ny-1) , y2 = c(cref)*(1-red)^(ny) )
+                  targ$rel = c(NA,NA)
+                  return(targ)                 
+                  }
  
 # to apply the HCR defined by GFCM 2013 recommandation
 # F=Fmax if B>Btrig
@@ -126,8 +147,30 @@ HCR.gfcm <- function(stoc, target)
                   return(targ)
                   }
    
- 
- 
+# same as above expect that reduction in F starts from 1  as soon as B<Bpa 
+HCR.gfcm.modified <- function(stoc, target)
+                  {
+                  # management points
+                  Fmax      <- target$Fmax
+                  Btrig     <- target$Btrig
+                  ssb.now <- ssb(stoc)[,ac(range(stoc)["maxyear"])]
+                  
+                  #  compute the Ftarget
+                  Ftarget   <- c(fbar(stoc)[,ac(range(stoc)["maxyear"])])
+                  Ftarget[] <- Fmax  #empty object to store the result
+                  
+                  sliding.slope <-  c((ssb.now - blim) / (bpa-blim))
+                  sliding.slope[sliding.slope<0]   <- 0
+                  sliding.slope[sliding.slope>1] <- 1                  
+                  
+                  Ftarget <- Ftarget * sliding.slope
+                  
+                  targ<-list()
+                  targ$quant = "f"
+                  targ$val = list(y1 = c(fbar(stoc)[,ac(range(stoc)["maxyear"])]) , y2 = Ftarget)
+                  targ$rel = c(NA,NA)
+                  return(targ)
+                  } 
                   
                   
 ################################################################################
@@ -221,14 +264,14 @@ Chistmin <- list( name = "Chistmin" ,
 #----- scenarios X% annual decrease in the catches untill Bpa is reached ------------------------
 
 ## scenario Catch at 2014 level
-#C5red <- list( name = "C5red" ,
-#             target = list(prec.red = 0.05, Btarget = bpa) ,
-#             HCR =  HCR.Cred ,
-#             spatial.closure = F ,
-#             additionnal.F.reduction = NA
-#           )    
-#
-#
+C5red <- list( name = "C5red" ,
+             target = list(prec.red = 0.05, Btarget = bpa) ,
+             HCR =  HCR.Cred ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )    
+
+
 
 ################################################################################
 #----- 	GFCM recommendation (2013)  ------------------------
@@ -243,7 +286,12 @@ GFCM.HCR <- list( name = "GFCM.HCR" ,
            )    
 
 
-
+GFCM.HCR.modif <- list( name = "GFCM.HCR.modified" ,
+             target = list(Fmax = Fmsy , Btrig = mean(c(bpa,blim))) ,
+             HCR =  HCR.gfcm ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )  
 
 
 
@@ -253,7 +301,11 @@ GFCM.HCR <- list( name = "GFCM.HCR" ,
 ########################################
 # combine them in a list
 
-# management.scenarios <- list(Fsq,Fmsy,Fmsy2020,Fmsy2020,Fmsy2025,C2014 , Chistmin)
-management.scenarios <- list(F.low,F.msy,F.sq)
+management.scenarios <- list( F.sq,F.msy,F.low,
+                              Fmsy2020,Fmsy2025,  
+                              C2014 , Chistmin,
+                              C5red, 
+                              GFCM.HCR, GFCM.HCR.modif)
+                              
 names(management.scenarios) <- lapply (management.scenarios , function(x) x[[1]])
 

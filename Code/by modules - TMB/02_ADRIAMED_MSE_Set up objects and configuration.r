@@ -97,7 +97,7 @@ sr.res <- make.arma.resid.lst(arima.fit.lst, age = 0, years = iy:(iy + ny-1) , r
 pl.res <- window(residuals(sr),end = iy+ny-1 )
 pl.res[,ac(iy:(iy + ny-1))] <- sr.res
 pl.res <- exp(pl.res)
-pl.res <- pl.res[,,,,,1:5]
+pl.res <- pl.res[,,,,,1:min(it,5)]
 png(paste0("Results/",species,"/PLOTS/recruiment deviations.png"), width=700, height=700)
 print(ggplot(pl.res, aes (x=year , y =data, colour = iter) ) + geom_line() +ggtitle("ARIMA recruitment deviations by iteration") + geom_vline(xintercept = iy-1)    +  geom_hline(yintercept = 1) )
 dev.off()

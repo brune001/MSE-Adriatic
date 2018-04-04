@@ -1,5 +1,16 @@
 ###############################################################################
-# 
+#
+#   NEW VERSION  MARCH/APRIL 2018 : Thomas BRUNEL and Niels HINTZEN (WMR)
+#
+#   SAM is fully integrated (assessment in the loop, uncertainty on starting conditions and model parameters incorporated in the OM)
+#   now presented in different modules to facilitate implementation
+#
+###############################################################################
+
+# developped from
+
+###############################################################################
+#   
 #EJ(20150119)
 # Tests on the evaluation of the NS-MAP using COD
 # NOTE1: The final analysis is in the report file.
@@ -13,16 +24,8 @@
 # February/MARCH 2017
 # Updated for 2017 GFCM WKMSE, using WGSAD2016 assessment data (last year=dy=2015)
 # FINAL VERSION UPLOADED ONTO GFCM SERVER
-#
-# Scenario numbers in brackets are equivalent to scenario numbers in the report
-#
-#
-#   NEW VERSION  MARCH 2018 : Thomas BRUNEL and Niels HINTZEN (WMR)
 
-#   SAM is fully integrated (assessment in the loop, uncertainty on starting conditions and model parameters incorporated in the OM)
-#   now presented in different modules to facilitate implementation
-#
-###############################################################################
+
 
 #==============================================================================
 # libraries 
@@ -61,8 +64,8 @@ source('./Code/by modules - TMB/MSE_functions.R')
 species <- "ANCHOVY"  # "ANCHOVY" or "SARDINE"
 assess.name <- "Anchovy GSA 17-18_tbmSAM"
 
-number.years.simulated  <- 10
-number.replicates.stock <- 5
+number.years.simulated  <- 15
+number.replicates.stock <- 2
 
 
 
@@ -92,7 +95,10 @@ save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_
 # run the simulation
 source('./Code/by modules - TMB/04_ADRIAMED_MSE_Simulations.r')      # load the function go_fish
 
-lapply(management.scenarios , function(scen) go_fish(scen$name))    # run the simulation for each management scenario
+scenario <- "F.sq"
+
+
+for (sc in scenario)  go_fish(sc)    # run the simulation for each management scenario
 
 
 

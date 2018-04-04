@@ -29,13 +29,13 @@ assess.name <- "Anchovy GSA 17-18_tbmSAM"
 setwd("C:/Users/brune001/my git files/MSE-Adriatic/")
 
 # source needed functions
-source('./Code/by modules - TMB/MSE_functions.R')
 load(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
+source('./Code/by modules - TMB/MSE_functions.R')
 source('./Code/by modules - TMB/03_ADRIAMED_MSE_BRPs and Scenarios.r')
 
 
 
-sc<- c("F.low","F.msy","F.sq")
+sc<- c("F.sq")
 
 
 #==============================================================================
@@ -55,7 +55,7 @@ results <- lapply(sc , function(x)
             {
             
             # load data  and rename / reshapre  and compute what's needed
-            load(file = paste0("./Results/",species,"/simres/",x,".RData"))
+            load(file = paste0("./Results/",species,"/simres/",x,"_",it,"its_",fy,".RData"))
             pstk <- window(res$pstk,end = range(res$pstk)["maxyear"] - 1)
             Fad <- window(res$Fad,end = range(res$pstk)["maxyear"] - 1)
             SSBad <-window(res$SSBad,end = range(res$pstk)["maxyear"] - 1)

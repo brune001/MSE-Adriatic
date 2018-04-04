@@ -584,7 +584,7 @@ Harvest  <- data.frame(as.data.frame(iter(fbar(Stk), c(1:nits))) , qname = "F")
 fds <- do.call (rbind ,list(Rec,SSB,Catch,Harvest))
 fds <- fds[fds$year >2000,]
 
-p<- p + geom_line(data=fds, aes(year, data, group=iter), size=0.5 ,colour = "grey50")  + ggtitle(title) +geom_vline(xintercept = iy-1)
+p<- p + geom_line(data=fds, aes(year, data, colour=iter), size=0.3 )  + ggtitle(title) + geom_vline(xintercept = iy-1)    + theme(legend.position="none")
 
 print(p)
 }
@@ -599,7 +599,7 @@ plot.iQuant <- function(quant,nits,title)
 p <- plot(quant)
 fds  <- data.frame(as.data.frame(iter(quant, c(1:nits))) , qname = "quant")
 fds <- fds[fds$year >2000,]
-p<- p + geom_line(data=fds, aes(year, data, group=iter), size=0.5 ,colour = "grey50")  + ggtitle(title) +geom_vline(xintercept = iy-1)
+p<- p + geom_line(data=fds, aes(year, data, colour=iter), size=0.3)  + ggtitle(title) +geom_vline(xintercept = iy-1)+ theme(legend.position="none")
 print(p)
 }
 
