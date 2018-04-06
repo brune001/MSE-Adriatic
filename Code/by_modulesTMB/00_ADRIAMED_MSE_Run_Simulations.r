@@ -51,8 +51,8 @@ library(msy)
 #==============================================================================
 
 # path to local github repository
-setwd("C:/Users/brune001/my git files/MSE-Adriatic/")
-
+#setwd("C:/Users/brune001/my git files/MSE-Adriatic/")
+setwd("~/MSE-Adriatic/")
 # source needed functions 
 source('./Code/by_modulesTMB/MSE_functions.R')
 
