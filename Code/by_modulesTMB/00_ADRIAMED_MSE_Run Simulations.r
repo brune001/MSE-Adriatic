@@ -54,7 +54,7 @@ library(msy)
 setwd("C:/Users/brune001/my git files/MSE-Adriatic/")
 
 # source needed functions 
-source('./Code/by modules - TMB/MSE_functions.R')
+source('./Code/by_modulesTMB/MSE_functions.R')
 
 
 #==============================================================================
@@ -87,9 +87,9 @@ number.replicates.stock <- 250
 
 # Load assessment data
 check.assess <- F
-source('./Code/by modules - TMB/01_ADRIAMED_MSE_Load assessment data.r')
+source('./Code/by_modulesTMB/01_ADRIAMED_MSE_Load assessment data.r')
 # Set up objects and configuration of the MSE
-source('./Code/by modules - TMB/02_ADRIAMED_MSE_Set up objects and configuration.r')
+source('./Code/by_modulesTMB/02_ADRIAMED_MSE_Set up objects and configuration.r')
 save.image(file=paste0("./Results/",species,"/",assess.name,"_",it,"iters_",ny,"yrs_blank_objects_MSE.RData"))
 }
 
@@ -105,7 +105,7 @@ if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iter
 load(fname)
 
 # Define BRPs and Management Scenarios
-source('./Code/by modules - TMB/03_ADRIAMED_MSE_BRPs and Scenarios.r')
+source('./Code/by_modulesTMB/03_ADRIAMED_MSE_BRPs and Scenarios.r')
 save.image(file=fname)
 # Save the environment at the start of the simulations
 
@@ -116,7 +116,7 @@ save.image(file=fname)
 #scenario <- c("F.low")
 
 strt <- proc.time()
-for (sc in scenario)  source('./Code/by modules - TMB/04_ADRIAMED_MSE_Simulations.r')       # run the simulation for each management scenario
+for (sc in scenario)  source('./Code/by_modulesTMB/04_ADRIAMED_MSE_Simulations.r')       # run the simulation for each management scenario
 proc.time() - strt
 
 
