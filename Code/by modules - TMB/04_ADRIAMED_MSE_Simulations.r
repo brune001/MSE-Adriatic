@@ -109,11 +109,7 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
 # 
 #  define the recruitment assumption to use in for the short term
 mean_rec <- exp(yearMeans(log(rec(stk0)[,ac(iay-c(1:3))])))
-if(!exists("srSTF"))
-{
-srSTF <- sr
-model(srSTF) <- "geomean"
-}
+if(!exists("srSTF")) srSTF <- fmle(as.FLSR(stk0, model="geomean"))
 for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
  
  
