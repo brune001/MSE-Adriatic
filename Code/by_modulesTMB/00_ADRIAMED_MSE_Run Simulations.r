@@ -93,7 +93,7 @@ source('./Code/by modules - TMB/02_ADRIAMED_MSE_Set up objects and configuration
 save.image(file=paste0("./Results/",species,"/",assess.name,"_",it,"iters_",ny,"yrs_blank_objects_MSE.RData"))
 }
 
-# to read in existing starting conditions (need to us this for the final run of simulatoins 
+# to read in existing starting conditions (need to us this for the final run of simulatoins
 # to make sure they use the same conditionning.
 
 # choose for full or short MSE
@@ -113,7 +113,7 @@ save.image(file=fname)
 
 
 # run the simulation
-scenario <- c("F.low")
+#scenario <- c("F.low")
 
 strt <- proc.time()
 for (sc in scenario)  source('./Code/by modules - TMB/04_ADRIAMED_MSE_Simulations.r')       # run the simulation for each management scenario
