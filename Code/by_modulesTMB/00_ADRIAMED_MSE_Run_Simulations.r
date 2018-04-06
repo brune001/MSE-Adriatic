@@ -30,7 +30,10 @@
 #==============================================================================
 # libraries 
 #==============================================================================
-rm(list=ls())
+args=(commandArgs(TRUE))
+scenario <- strsplit(args,"=")[[1]][2]
+
+#rm(list=ls())
 library(FLash)
 #library(FLasher)
 library(FLAssess)
@@ -97,7 +100,7 @@ save.image(file=paste0("./Results/",species,"/",assess.name,"_",it,"iters_",ny,"
 # to make sure they use the same conditionning.
 
 # choose for full or short MSE
-run <- "short"
+run <- "full"
 
 if(run == "full")  fname <-  paste0("./Results/",species,"/",assess.name,"_250iters_20yrs_blank_objects_MSE.RData")
 if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iters_12yrs_blank_objects_MSE.RData")
