@@ -7,7 +7,7 @@ cat("running",run,"MSE\n")
  # sc <- "Fmsy2025"
  # sc <- "C2014"
  # sc <- "Chistmin"
- # sc <- "C5red"
+ # sc <- "C50red"
  # sc <- "GFCM.HCR" 
  # sc <- "Bpa.Fmsy2020"
 
@@ -119,31 +119,30 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
 #                   - quant to describe if we are manageing F, catches or biomass
 #                   - rel to express if the quantity and values apply as a multiplier to the value in a given year
 #
-  target <-  HCR(stk0 , mgt.target )
-            # add extra reduction in F when part of the scenario
-  if (!is.na(addFred))  target$val$y2     <- (1-addFred) * target$val$y2
   
-
+  # doing the advice separately for each iteration in order to allow for 
+  # different types of target to be set for different iterations
   
-  # create the control object
-  ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity= target$quant, val=c(mean(target$val$y1), mean(target$val$y2)), rel.year = target$rel))
-  # populate the iteration specific values
-  #  dnms <- list(year=c(iay,(iay+1)), c("min", "val", "max"),iter=1:it)
-  dnms <- list(1:2, c("min", "val", "max"),iter=1:it)  
-  arr0 <- array(NA, dimnames=dnms, dim=unlist(lapply(dnms, length)))
-  arr0[1,"val",] <- c(target$val$y1)            #intermediate year in  the STF
-  arr0[2,"val",] <- c(target$val$y2)      # advice year in the STF                                 # changed as above
-  ctrl@trgtArray <- arr0
-  ## Short term forecast object 2 years of stk0
-  stkTmp <- stf(stk0, 2)
-  # project forward with the control you want and the SR rel you defined above, with residuals
-  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=srSTF  ,maxF = 10) 
-  
-  # update objects storing the basis for the advice
-  TAC[,ac(iay+1)]   <- catch(stkTmp)[,ac(iay+1)]
-  SSBad[,ac(iay+1)] <- ssb(stkTmp)[,ac(iay+1)]
-  Fad[,ac(iay+1)]   <- fbar(stkTmp)[,ac(iay+1)]
-
+  for (its in 1:it)
+        {
+        target <-  HCR(iter(stk0,its) , mgt.target )
+                  # add extra reduction in F when part of the scenario
+        if (!is.na(addFred))  target$val$y2     <- (1-addFred) * target$val$y2
+         
+        # create the control object
+        ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity= target$quant, val=c((target$val$y1), (target$val$y2)), rel.year = target$rel))
+        # populate the iteration specific values
+        ## Short term forecast object 2 years of stk0
+        stkTmp <- stf(iter(stk0,its), 2)
+        # project forward with the control you want and the SR rel you defined above, with residuals
+        stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=iter(srSTF,its)  ,maxF = 10) 
+        
+        
+         # update objects storing the basis for the advice
+         iter(TAC[,ac(iay+1)],its)   <- catch(stkTmp)[,ac(iay+1)]
+         iter(SSBad[,ac(iay+1)],its) <- ssb(stkTmp)[,ac(iay+1)]
+         iter(Fad[,ac(iay+1)],its)   <- fbar(stkTmp)[,ac(iay+1)]
+       }
 
 ### UPDATE THE OM BASED ON THE TAC ADVICE (with on year lag)
  dnms <- list(year=c(iay), c("min", "val", "max"),iter=1:it)

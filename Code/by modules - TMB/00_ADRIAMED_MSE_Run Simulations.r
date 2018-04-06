@@ -69,7 +69,7 @@ assess.name <- "Anchovy GSA 17-18_tbmSAM"
 ###
 #species <- "SARDINE"  # "ANCHOVY" or "SARDINE"
 #assess.name <- "Sardine GSA 17-18_tbmSAM"
-####
+#####
 
 
 ### to create new starting conditions
@@ -80,10 +80,10 @@ if (update.objects)
 # for full
 number.years.simulated  <- 20
 number.replicates.stock <- 250
-#for short
-number.years.simulated  <- 12
-number.replicates.stock <- 2
-
+##for short#
+#number.years.simulated  <- 12
+#number.replicates.stock <- 2
+##
 
 # Load assessment data
 check.assess <- F
