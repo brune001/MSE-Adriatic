@@ -49,13 +49,13 @@ sam.ctrl.new@states["catch unique",]                      <- sam.ctrl@states["ca
 sam.ctrl.new@logN.vars[]                                  <- sam.ctrl@logN.vars[]
 sam.ctrl.new@catchabilities["Echo West",ac(0:4)]          <- sam.ctrl@catchabilities["Echo West",ac(0:4)]
 sam.ctrl.new@catchabilities["Echo East",ac(0:2)]          <- sam.ctrl@catchabilities["Echo East",ac(0:2)]
-sam.ctrl.new@catchabilities["Echo East Biomass",ac(0)]    <- 101
+sam.ctrl.new@catchabilities["Echo East Biomass",ac(0)]    <- 9
 
 sam.ctrl.new@f.vars["catch unique",]                      <- sam.ctrl@f.vars["catch",]
 sam.ctrl.new@obs.vars["catch unique",ac(0:4)]             <- sam.ctrl@obs.vars["catch",ac(0:4)]
 sam.ctrl.new@obs.vars["Echo West",ac(0:4)]                <- sam.ctrl@obs.vars["Echo West",ac(0:4)]
 sam.ctrl.new@obs.vars["Echo East",ac(0:2)]                <- sam.ctrl@obs.vars["Echo East",ac(0:2)]
-sam.ctrl.new@obs.vars["Echo East Biomass",ac(0)]          <- 101
+sam.ctrl.new@obs.vars["Echo East Biomass",ac(0)]          <- 12
 sam.ctrl.new@cor.F <- 0
 sam.ctrl.new@residuals <- F
 sam.ctrl.new <- update(sam.ctrl.new)
@@ -88,9 +88,9 @@ sam.ctrl.new <- update(sam.ctrl.new)
 #- Final model
 sam.ctrl.new@logN.vars[]                                  <- 0
 sam.ctrl.new@obs.vars["catch unique",ac(0:4)]             <- 0
-sam.ctrl.new@obs.vars["Echo West",ac(0:4)]                <- c(0,0,1,1,2) + 101
-sam.ctrl.new@obs.vars["Echo East",ac(0:2)]                <- c(0,1,2) + 201
-sam.ctrl.new@obs.vars["Echo East Biomass",ac(0)]          <- 301
+sam.ctrl.new@obs.vars["Echo West",ac(0:4)]                <- c(0,0,1,1,2) + 1
+sam.ctrl.new@obs.vars["Echo East",ac(0:2)]                <- c(0,1,2) + 4
+sam.ctrl.new@obs.vars["Echo East Biomass",ac(0)]          <- 7
 sam.ctrl.new                                              <- update(sam.ctrl.new)
 SARDINE2.sam                                              <- FLSAM(stk,ids,sam.ctrl.new)
 

@@ -1,13 +1,7 @@
 
-go_fish <- function(sc)                
-{
- 
- 
- 
- 
- 
-load(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
- # sc <- "Fmsy"
+load(fname)
+cat("running",run,"MSE\n")
+ # sc <- "F.msy"
  # sc <- "Fmsy2025"
  # sc <- "C2014"
  # sc <- "Chistmin"
@@ -92,9 +86,14 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
 #### DO THE ASSESSMENT FOR EACH ITERATION SUCCESIVELY  AND UPDATE THE PERCIEVED STOCK
   sam0.ctrl <- sam.ctrl
   sam0.ctrl@range["maxyear"]  <- iay-1
-
+  
   if (iay == iy)  res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,return.sam=T)
   if (iay > iy)   res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,starting.sam=res,return.sam=T)
+  
+  trouble <- data.frame(iter = 1:it , failure =  unlist(lapply(res , function(x) is.na(x))))
+  trouble <- trouble[trouble$failure == T,]
+  if (dim(trouble)[1] > 0) for (ii in trouble$iter) res[[ii]] <-  FLSAM(iter(stk0,ii),FLIndices(lapply(idx0 , function(x) iter(x,ii))),sam0.ctrl)
+#  
   
     for(ii in 1:it)
         {
@@ -116,19 +115,19 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   
   # create the control object
   ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity= target$quant, val=c(mean(target$val$y1), mean(target$val$y2)), rel.year = target$rel))
-  
+
   # populate the iteration specific values
-#  dnms <- list(year=c(iay,(iay+1)), c("min", "val", "max"),iter=1:it)
+  #  dnms <- list(year=c(iay,(iay+1)), c("min", "val", "max"),iter=1:it)
   dnms <- list(1:2, c("min", "val", "max"),iter=1:it)  
   arr0 <- array(NA, dimnames=dnms, dim=unlist(lapply(dnms, length)))
   arr0[1,"val",] <- c(target$val$y1)            #intermediate year in  the STF
   arr0[2,"val",] <- c(target$val$y2)      # advice year in the STF                                 # changed as above
   ctrl@trgtArray <- arr0
-  
   ## Short term forecast object 2 years of stk0
   stkTmp <- stf(stk0, 2)
   # project forward with the control you want and the SR rel you defined above, with residuals
-  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=sr  ,maxF = 10) 
+  if (species == "SARDINE") { mf <- 0.5 } else { mf = 10}
+  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=sr  ,maxF = mf) 
   
   # update objects storing the basis for the advice
   TAC[,ac(iay+1)] <- catch(stkTmp)[,ac(iay+1)]
@@ -149,10 +148,10 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
  ctrlOM@trgtArray <- arr0
  # update pstk with stkTmp
  pstk <- fwd(pstk, ctrl=ctrlOM, sr=sr, sr.residuals = exp(sr.res[,ac(iay)]), sr.residuals.mult = TRUE , maxF = 10) #
+
+
+# save at each time step
+restosave <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC)
+save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,".RData"))
+
 }  # end of year loops
-
-
-res <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC)
-
-save(res,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,".RData"))
-}

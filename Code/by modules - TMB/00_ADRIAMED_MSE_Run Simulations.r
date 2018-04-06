@@ -61,44 +61,58 @@ source('./Code/by modules - TMB/MSE_functions.R')
 # Basic configuration of the simulations
 #==============================================================================
 
+
+
+
 species <- "ANCHOVY"  # "ANCHOVY" or "SARDINE"
 assess.name <- "Anchovy GSA 17-18_tbmSAM"
+###
+#species <- "SARDINE"  # "ANCHOVY" or "SARDINE"
+#assess.name <- "Sardine GSA 17-18_tbmSAM"
+####
 
-number.years.simulated  <- 15
-number.replicates.stock <- 2
 
-
-
-
-update.objects <- T
+### to create new starting conditions
+update.objects <- F
 
 if (update.objects)
 {
+number.years.simulated  <- 12
+number.replicates.stock <- 2
+
 # Load assessment data
 check.assess <- F
 source('./Code/by modules - TMB/01_ADRIAMED_MSE_Load assessment data.r')
 # Set up objects and configuration of the MSE
 source('./Code/by modules - TMB/02_ADRIAMED_MSE_Set up objects and configuration.r')
-save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
+save.image(file=paste0("./Results/",species,"/",assess.name,"_",it,"iters_",ny,"yrs_blank_objects_MSE.RData"))
 }
 
+# to read in existing starting conditions (need to us this for the final run of simulatoins 
+# to make sure they use the same conditionning.
+
+# choose for full or short MSE
+run <- "full"
+
+if(run == "full")  fname <-  paste0("./Results/",species,"/",assess.name,"_250iters_20yrs_blank_objects_MSE.RData")
+if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iters_12yrs_blank_objects_MSE.RData")
+
+load(fname)
 
 # Define BRPs and Management Scenarios
-load(paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
 source('./Code/by modules - TMB/03_ADRIAMED_MSE_BRPs and Scenarios.r')
-save.image(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
+save.image(file=fname)
 # Save the environment at the start of the simulations
 
 
 
 
 # run the simulation
-source('./Code/by modules - TMB/04_ADRIAMED_MSE_Simulations.r')      # load the function go_fish
+scenario <- c("Fmsy2020","Fmsy2025")
 
-scenario <- "F.sq"
-
-
-for (sc in scenario)  go_fish(sc)    # run the simulation for each management scenario
+strt <- proc.time()
+for (sc in scenario)  source('./Code/by modules - TMB/04_ADRIAMED_MSE_Simulations.r')       # run the simulation for each management scenario
+proc.time() - strt
 
 
 

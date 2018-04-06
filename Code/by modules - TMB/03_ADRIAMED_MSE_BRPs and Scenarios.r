@@ -195,38 +195,33 @@ HCR.Bpa.Fmsy<- function(stoc, target)
                   
                   # first target is Btarget in the first year
                   if(ynow  == ystart) {
-                                      targ<-list()
+                  
+                                      # find the Fbar which brings SSB at Bpa
+                                                               targ<-list()
                                       targ$quant = c("catch","ssb")
                                       targ$val = list(y1 = c(catch(stoc)[,"2014"]) , y2 = c(btarget))
                                       targ$rel = c(NA,NA)
                                       } else        #### had to add this for the second year because Bpa could not be reach in the first year for ANCHOVY
                                       {
-                                      if(ynow  == ystart+1) 
-                                            {targ<-list()
-                                            targ$quant = c("catch","ssb")
-                                            targ$val = list(y1 = c(0) , y2 = c(btarget))
-                                            targ$rel = c(NA,NA)
-                                            } else
-                                            {  
-                                            # reduction to apply
-                                            step.change  <- (ftarget - flast ) / (ytarg - ylast) # annual reduction
-                                            targ1 <-   flast +  step.change                      # Ftarget first year : here we make the assumption in the STF that we applied the same decrease last year. not exactly true, but better than a status quo assumption for the intermediate year
-                                            targ2 <-   flast + 2*step.change                     # Ftarget for the advice year
-                                            if(ytarg == (ylast+1)) targ2 <- targ1                # in case is reached during the intermediate year
-                                            # build the target object                  
-                                            targ<-list()
-                                            targ$quant = "f"
-                                            targ$val = list(y1 = c(targ1) , y2 = c(targ2))
-                                            targ$rel = c(NA,NA)
-                                            
-                                            # if we are past the target year to reach Fmsy, just apply a flat HCR.gfcm.modified
-                                            if(ylast>=ytarg) 
-                                                {
-                                                targetbis  <- list(Fmax = Fmsy , Btrig = mean(c(bpa,blim)))
-                                                targ <- HCR.gfcm.modified (stoc, targetbis)
-                                                } 
-                                            }
+                                      # reduction to apply
+                                      step.change  <- (ftarget - flast ) / (ytarg - ylast) # annual reduction
+                                      targ1 <-   flast +  step.change                      # Ftarget first year : here we make the assumption in the STF that we applied the same decrease last year. not exactly true, but better than a status quo assumption for the intermediate year
+                                      targ2 <-   flast + 2*step.change                     # Ftarget for the advice year
+                                      if(ytarg == (ylast+1)) targ2 <- targ1                # in case is reached during the intermediate year
+                                      # build the target object                  
+                                      targ<-list()
+                                      targ$quant = "f"
+                                      targ$val = list(y1 = c(targ1) , y2 = c(targ2))
+                                      targ$rel = c(NA,NA)
+                                      
+                                      # if we are past the target year to reach Fmsy, just apply a flat HCR.gfcm.modified
+                                      if(ylast>=ytarg) 
+                                          {
+                                          targetbis  <- list(Fmax = Fmsy , Btrig = mean(c(bpa,blim)))
+                                          targ <- HCR.gfcm.modified (stoc, targetbis)
+                                          } 
                                       }
+                                      
                   return(targ)
                   }                  
                   

@@ -24,27 +24,37 @@ library(msy)
 species <- "ANCHOVY"  # "ANCHOVY" or "SARDINE"
 assess.name <- "Anchovy GSA 17-18_tbmSAM"
 
+#species <- "SARDINE"  # "ANCHOVY" or "SARDINE"
+#assess.name <- "Sardine GSA 17-18_tbmSAM"
+#
 
 # path to local github repository
 setwd("C:/Users/brune001/my git files/MSE-Adriatic/")
 
 # source needed functions
-load(file=paste0("./Results/",species,"/MSE_",assess.name,"_blank_objects_MSE_",".RData"))
+run <- "full"
+
+if(run == "full")  fname <-  paste0("./Results/",species,"/",assess.name,"_250iters_20yrs_blank_objects_MSE.RData")
+if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iters_12yrs_blank_objects_MSE.RData")
+
+load(fname)
+
 source('./Code/by modules - TMB/MSE_functions.R')
 source('./Code/by modules - TMB/03_ADRIAMED_MSE_BRPs and Scenarios.r')
 
 
 
-sc<- c("F.sq")
+sc <- c("F.msy" , "Fmsy2020","Fmsy2025")
+
 
 
 #==============================================================================
 # time periods
 #==============================================================================
 
-ST <- ac(2017:2018)
-MT <- ac(2019:2022)
-LT <- ac(2023:2025)
+ST <- ac(2017:2021)
+MT <- ac(2022:2027)
+LT <- ac(2028:2036)
 
 
 #==============================================================================
@@ -53,9 +63,10 @@ LT <- ac(2023:2025)
 
 results <- lapply(sc , function(x) 
             {
-            
+            cat(x,"\n")
             # load data  and rename / reshapre  and compute what's needed
             load(file = paste0("./Results/",species,"/simres/",x,"_",it,"its_",fy,".RData"))
+            res<-restosave
             pstk <- window(res$pstk,end = range(res$pstk)["maxyear"] - 1)
             Fad <- window(res$Fad,end = range(res$pstk)["maxyear"] - 1)
             SSBad <-window(res$SSBad,end = range(res$pstk)["maxyear"] - 1)
@@ -139,5 +150,9 @@ results <- lapply(sc , function(x)
 diagnostics     <- do.call(rbind.data.frame, lapply(results , function(x) x[[1]]))             
 detailed.output <- do.call(rbind.data.frame, lapply(results , function(x) x[[2]])) 
 
-write.csv(detailed.output,file = paste0("Results/",species,"/detailed.output.csv"), row.names=FALSE)
-                        
+write.csv(diagnostics,file = paste0("Results/",species,"/diagnostics_",run,"_MSE.csv"), row.names=FALSE)
+write.csv(detailed.output,file = paste0("Results/",species,"/detailed.output_",run,"_MSE.csv"), row.names=FALSE)                        
+
+
+
+

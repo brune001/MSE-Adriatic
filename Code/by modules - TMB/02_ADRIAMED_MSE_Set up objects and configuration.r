@@ -49,7 +49,7 @@ nsqy <- 3                           # number of SQ years upon which to average r
 #-------------------------------------------------------------------------------
 
 sstk                            <- monteCarloStockTMB ( stk , ids , sam , it)
-save(random.param,file= paste0("./Results/",species,"/random.param.RData"))    # location where the model parameters for the nits replicates will be stored
+
 
 
 #--------------------------------------------------------------------------------------------
@@ -113,10 +113,17 @@ ssb <- c(ssb(stk)@.Data)
 segreg.meanssb  <- function(ab, ssb) log(ifelse(ssb >= mean(ssb), ab$a*mean(ssb), ab$a*ssb))
 fit.meanssb <- eqsr_fit(stk,nsamp=2000, models = c("segreg.meanssb"))
 
+
+
+
+plot.rec.res <- F
+
+if (plot.rec.res == T)
+{
+
 png(paste0("Results/",species,"/PLOTS/segreg_bkptmeanSSB_confidence.png"), width=700, height=700)
 eqsr_plot(fit.meanssb)
 dev.off()
-
 # GENERAL PLOTS
 # Labeled plot (with years)
 fitted <- as.data.frame(fitted(sr)); names(fitted)[7] <- "fitted"
@@ -167,7 +174,7 @@ ggplot(df.sr.bktp.meanssb, aes(x=year, y=obs , colour = iter ,group=iter)) +
         plot.title = element_text(size=25, face="bold"))
 dev.off()
 
-
+ }
 
 
 
@@ -214,8 +221,6 @@ discards.n(pstk) <- propagate(discards.n(pstk), it)
 # make random draws, and store the exp of them, the actual dev.idx, in the slot index.var
 
 idx <- ids
-# loading the parameteres specific to each iteration
-load(paste0("./RESULTS/",species,"/random.param.RData"))  #getting object random.param
 
 logQ        <- random.param[,colnames(random.param)=="logFpar"]
 logSdObs    <- random.param[,colnames(random.param)=="logSdLogObs"]
