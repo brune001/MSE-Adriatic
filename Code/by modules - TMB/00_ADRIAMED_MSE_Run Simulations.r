@@ -32,7 +32,7 @@
 #==============================================================================
 rm(list=ls())
 library(FLash)
-library(FLasher)
+#library(FLasher)
 library(FLAssess)
 library(ggplotFL)
 library(FLBRP)
@@ -77,8 +77,13 @@ update.objects <- F
 
 if (update.objects)
 {
+# for full
+number.years.simulated  <- 20
+number.replicates.stock <- 250
+#for short
 number.years.simulated  <- 12
 number.replicates.stock <- 2
+
 
 # Load assessment data
 check.assess <- F
@@ -92,7 +97,7 @@ save.image(file=paste0("./Results/",species,"/",assess.name,"_",it,"iters_",ny,"
 # to make sure they use the same conditionning.
 
 # choose for full or short MSE
-run <- "full"
+run <- "short"
 
 if(run == "full")  fname <-  paste0("./Results/",species,"/",assess.name,"_250iters_20yrs_blank_objects_MSE.RData")
 if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iters_12yrs_blank_objects_MSE.RData")
@@ -108,7 +113,7 @@ save.image(file=fname)
 
 
 # run the simulation
-scenario <- c("Fmsy2020","Fmsy2025")
+scenario <- c("F.low")
 
 strt <- proc.time()
 for (sc in scenario)  source('./Code/by modules - TMB/04_ADRIAMED_MSE_Simulations.r')       # run the simulation for each management scenario

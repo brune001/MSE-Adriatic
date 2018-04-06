@@ -1,6 +1,8 @@
 
 load(fname)
+pstk  <- pstksave
 cat("running",run,"MSE\n")
+ # sc <- "F.low"
  # sc <- "F.msy"
  # sc <- "Fmsy2025"
  # sc <- "C2014"
@@ -104,6 +106,16 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
 
 
 ### STF ON THE PERCIEVED STOCK TO PRODUCE AND ADVICE
+# 
+#  define the recruitment assumption to use in for the short term
+mean_rec <- exp(yearMeans(log(rec(stk0)[,ac(iay-c(1:3))])))
+if(!exists("srSTF"))
+{
+srSTF <- sr
+model(srSTF) <- "geomean"
+}
+for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
+ 
  
 # compute the target to achieve in the advice year. 
 # target has a slots  as a fwdControl object
@@ -112,10 +124,13 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
 #                   - rel to express if the quantity and values apply as a multiplier to the value in a given year
 #
   target <-  HCR(stk0 , mgt.target )
+            # add extra reduction in F when part of the scenario
+  if (!is.na(addFred))  target$val$y2     <- (1-addFred) * target$val$y2
+  
+
   
   # create the control object
   ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity= target$quant, val=c(mean(target$val$y1), mean(target$val$y2)), rel.year = target$rel))
-
   # populate the iteration specific values
   #  dnms <- list(year=c(iay,(iay+1)), c("min", "val", "max"),iter=1:it)
   dnms <- list(1:2, c("min", "val", "max"),iter=1:it)  
@@ -126,21 +141,15 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   ## Short term forecast object 2 years of stk0
   stkTmp <- stf(stk0, 2)
   # project forward with the control you want and the SR rel you defined above, with residuals
-  if (species == "SARDINE") { mf <- 0.5 } else { mf = 10}
-  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=sr  ,maxF = mf) 
+  stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=srSTF  ,maxF = 10) 
   
   # update objects storing the basis for the advice
-  TAC[,ac(iay+1)] <- catch(stkTmp)[,ac(iay+1)]
+  TAC[,ac(iay+1)]   <- catch(stkTmp)[,ac(iay+1)]
   SSBad[,ac(iay+1)] <- ssb(stkTmp)[,ac(iay+1)]
-  Fad[,ac(iay+1)] <- fbar(stkTmp)[,ac(iay+1)]
+  Fad[,ac(iay+1)]   <- fbar(stkTmp)[,ac(iay+1)]
 
 
 ### UPDATE THE OM BASED ON THE TAC ADVICE (with on year lag)
-  # OM proj
- ctrl@target <- ctrl@target[2,]
- ctrl@trgtArray <- ctrl@trgtArray[2,,,drop=FALSE]   ### I don't  agree with this... we cannot apply the Ftarget to the OM because the realised F is different due to assessment errors
-
-# instead we have to find the F to applied, based on the TAC, assuming catch = TAC
  dnms <- list(year=c(iay), c("min", "val", "max"),iter=1:it)
  arr0 <- array(NA, dimnames=dnms, dim=unlist(lapply(dnms, length)))
  arr0[,"val",] <- TAC[,ac(iay)]

@@ -3,7 +3,7 @@
 #==============================================================================
 rm(list=ls())
 library(FLash)
-library(FLasher)
+#library(FLasher)
 library(FLAssess)
 library(ggplotFL)
 library(FLBRP)
@@ -44,7 +44,7 @@ source('./Code/by modules - TMB/03_ADRIAMED_MSE_BRPs and Scenarios.r')
 
 
 
-sc <- c("F.msy" , "Fmsy2020","Fmsy2025")
+sc <- c("F.low.NO_SAM")
 
 
 
@@ -81,15 +81,15 @@ results <- lapply(sc , function(x)
 
             # plot the output
                 # stock trends
-            png(paste0("Results/",species,"/PLOTS/",x,"_OM trends.png"), width=6, height=10,units = "in" , res = 300)
+            png(paste0("Results/",species,"/PLOTS/",x,run,"_OM trends.png"), width=6, height=10,units = "in" , res = 300)
             plot.iStk(pstk ,nits = 2 , title = paste("scenario",x))    
             dev.off()   
                 # assessment errors
-            png(paste0("Results/",species,"/PLOTS/",x,"_SSB error.png"), width=6, height=4,units = "in" , res = 300)
+            png(paste0("Results/",species,"/PLOTS/",x,run,"_SSB error.png"), width=6, height=4,units = "in" , res = 300)
             plot.iQuant(devSSB ,nits = 2 , title = "% error SSB Advice Year")    
             dev.off()     
             
-            png(paste0("Results/",species,"/PLOTS/",x,"_Fbar error.png"), width=6, height=4,units = "in" , res = 300)
+            png(paste0("Results/",species,"/PLOTS/",x,run,"_Fbar error.png"), width=6, height=4,units = "in" , res = 300)
             plot.iQuant(devF ,nits = 2 , title = "% error F Advice Year")    
             dev.off()    
             
@@ -103,7 +103,7 @@ results <- lapply(sc , function(x)
              P<- P + geom_rect(data = as.data.frame(iter(rsk,1)),aes(xmin = min(an(LT)) ,xmax = max(an(LT)) , ymin =0 , ymax = 1 ) , fill = "red" , alpha = 0.02) 
              P<- P + xlim(ay,fy)+ ylim(0,1) +ylab("p(SSB<Blim)") + ggtitle("probability of falling below Blim")
              P<- P + geom_text(data=time , aes(x=x , y=y , label = time)) 
-             png(paste0("Results/",species,"/PLOTS/",x,"_RiskBlim.png"), width=6, height=4,units = "in" , res = 300)
+             png(paste0("Results/",species,"/PLOTS/",x,run,"_RiskBlim.png"), width=6, height=4,units = "in" , res = 300)
              print(P) 
              dev.off() 
              

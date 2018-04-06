@@ -241,13 +241,25 @@ HCR.Bpa.Fmsy<- function(stoc, target)
       # basis Ftarget = Fsq used to give advice starting in 2018
       # Fsq = F2014-2016
 F.sq <- list( name = "F.sq" ,
-             target = list(Ftarget = mean(c(fbar(stk)[,ac(dy)]))) ,
+             target = list(Ftarget = mean(c(fbar(stk)[,ac((dy-2):dy)]))) ,
              HCR =  HCR.cstF ,
              spatial.closure = F ,
              additionnal.F.reduction = NA
            )    
 
-
+F.sqEMERGENCY4 <- list( name = "F.sqEMERGENCY4" ,
+             target = list(Ftarget = mean(c(fbar(stk)[,ac((dy-2):dy)]))) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = T ,
+             additionnal.F.reduction = 0.04
+           ) 
+           
+F.sqEMERGENCY8 <- list( name = "F.sqEMERGENCY8" ,
+             target = list(Ftarget = mean(c(fbar(stk)[,ac((dy-2):dy)]))) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = T ,
+             additionnal.F.reduction = 0.08
+           )            
 
 # scenario Fmsy :
       # basis Ftarget = Fmsy used to give advice starting in 2018
@@ -366,6 +378,7 @@ Bpa.Fmsy2020 <- list( name= "Bpa.Fmsy2020",
 # combine them in a list
 
 management.scenarios <- list( F.sq,F.msy,F.low,
+                              F.sqEMERGENCY4 , F.sqEMERGENCY8 ,
                               Fmsy2020,Fmsy2025,  
                               C2014 , Chistmin,
                               C5red, 
