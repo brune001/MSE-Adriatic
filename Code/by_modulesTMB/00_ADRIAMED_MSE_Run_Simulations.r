@@ -31,6 +31,7 @@
 # libraries 
 #==============================================================================
 args=(commandArgs(TRUE))
+print(args)
 scenario <- strsplit(args,"=")[[1]][2]
 
 #rm(list=ls())
