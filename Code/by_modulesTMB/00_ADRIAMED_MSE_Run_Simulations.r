@@ -87,9 +87,9 @@ number.replicates.stock <- 250
 
 # Load assessment data
 check.assess <- F
-source('./Code/by_modulesTMB/01_ADRIAMED_MSE_Load assessment data.r')
+source('./Code/by_modulesTMB/01_ADRIAMED_MSE_Load_assessment_data.r')
 # Set up objects and configuration of the MSE
-source('./Code/by_modulesTMB/02_ADRIAMED_MSE_Set up objects and configuration.r')
+source('./Code/by_modulesTMB/02_ADRIAMED_MSE_Set_up_objects_and_configuration.r')
 save.image(file=paste0("./Results/",species,"/",assess.name,"_",it,"iters_",ny,"yrs_blank_objects_MSE.RData"))
 }
 
@@ -105,7 +105,7 @@ if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iter
 load(fname)
 
 # Define BRPs and Management Scenarios
-source('./Code/by_modulesTMB/03_ADRIAMED_MSE_BRPs and Scenarios.r')
+source('./Code/by_modulesTMB/03_ADRIAMED_MSE_BRPs_and_Scenarios.r')
 save.image(file=fname)
 # Save the environment at the start of the simulations
 
