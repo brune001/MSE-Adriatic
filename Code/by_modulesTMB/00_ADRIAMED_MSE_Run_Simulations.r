@@ -32,6 +32,7 @@
 #==============================================================================
 args=(commandArgs(TRUE))
 print(args)
+argsOrig <- args
 scenario <- strsplit(args,"=")[[1]][2]
 
 #rm(list=ls())
@@ -108,9 +109,12 @@ if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iter
 
 load(fname)
 
+if(run == "full")  sname <-  paste0("./Results/",species,"/",assess.name,"_",scenario,"_250iters_20yrs_blank_objects_MSE.RData")
+if(run == "short") sname <-  paste0("./Results/",species,"/",assess.name,"_",scenario,"_2iters_12yrs_blank_objects_MSE.RData")
+
 # Define BRPs and Management Scenarios
 source('./Code/by_modulesTMB/03_ADRIAMED_MSE_BRPs_and_Scenarios.r')
-save.image(file=fname)
+save.image(file=sname)
 # Save the environment at the start of the simulations
 
 
@@ -118,7 +122,7 @@ save.image(file=fname)
 
 # run the simulation
 #scenario <- c("F.low")
-
+scenario <- strsplit(argsOrig,"=")[[1]][2]
 strt <- proc.time()
 for (sc in scenario)  source('./Code/by_modulesTMB/04_ADRIAMED_MSE_Simulations.r')       # run the simulation for each management scenario
 proc.time() - strt
