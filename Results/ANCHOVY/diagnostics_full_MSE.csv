@@ -1,21 +1,281 @@
 "scenario","time","var","val"
-"F.low.NO_SAM","Short Term","ssb","133729.030971389"
-"F.low.NO_SAM","Medium Term","ssb","184629.423050904"
-"F.low.NO_SAM","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+"F.sq","Short Term","ssb","94938.0441561529"
+"F.sq","Medium Term","ssb","101289.541963906"
+"F.sq","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
   subscript out of bounds
 "
-"F.low.NO_SAM","Short Term","catch","10954.1900477349"
-"F.low.NO_SAM","Medium Term","catch","12670.3564047492"
-"F.low.NO_SAM","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+"F.sq","Short Term","catch","25635.469317813"
+"F.sq","Medium Term","catch","39280.2866596407"
+"F.sq","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
   subscript out of bounds
 "
-"F.low.NO_SAM","Short Term","Fbar","0.5456183209801"
-"F.low.NO_SAM","Medium Term","Fbar","0.0992043367758907"
-"F.low.NO_SAM","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+"F.sq","Short Term","Fbar","1.39700535234297"
+"F.sq","Medium Term","Fbar","2.98420649901068"
+"F.sq","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
   subscript out of bounds
 "
-"F.low.NO_SAM","Short Term","risk","0.076"
-"F.low.NO_SAM","Medium Term","risk","0.08"
-"F.low.NO_SAM","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+"F.sq","Short Term","risk","0.304"
+"F.sq","Medium Term","risk","0.484"
+"F.sq","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"F.msy","Short Term","ssb","117352.428429089"
+"F.msy","Medium Term","ssb","143156.55462581"
+"F.msy","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"F.msy","Short Term","catch","18467.8178173671"
+"F.msy","Medium Term","catch","36322.4289706946"
+"F.msy","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"F.msy","Short Term","Fbar","0.826952531712699"
+"F.msy","Medium Term","Fbar","0.880314989773542"
+"F.msy","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"F.msy","Short Term","risk","0.124"
+"F.msy","Medium Term","risk","0.328"
+"F.msy","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"F.low","Short Term","ssb","133538.736527469"
+"F.low","Medium Term","ssb","191294.438193291"
+"F.low","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"F.low","Short Term","catch","9451.41540368787"
+"F.low","Medium Term","catch","14251.0182122149"
+"F.low","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"F.low","Short Term","Fbar","0.520027480370007"
+"F.low","Medium Term","Fbar","0.107319612567365"
+"F.low","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"F.low","Short Term","risk","0.072"
+"F.low","Medium Term","risk","0.068"
+"F.low","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"GFCM.HCR","Short Term","ssb","127150.857710142"
+"GFCM.HCR","Medium Term","ssb","96881.4706232291"
+"GFCM.HCR","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"GFCM.HCR","Short Term","catch","15821.9106703361"
+"GFCM.HCR","Medium Term","catch","41709.5580150559"
+"GFCM.HCR","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"GFCM.HCR","Short Term","Fbar","0.621857353043619"
+"GFCM.HCR","Medium Term","Fbar","1.1488753431314"
+"GFCM.HCR","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"GFCM.HCR","Short Term","risk","0.072"
+"GFCM.HCR","Medium Term","risk","1"
+"GFCM.HCR","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"GFCM.HCR.modif","Short Term","ssb","128332.697474597"
+"GFCM.HCR.modif","Medium Term","ssb","96442.7255868161"
+"GFCM.HCR.modif","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"GFCM.HCR.modif","Short Term","catch","15335.7436030495"
+"GFCM.HCR.modif","Medium Term","catch","42519.8404343998"
+"GFCM.HCR.modif","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"GFCM.HCR.modif","Short Term","Fbar","0.612362630937849"
+"GFCM.HCR.modif","Medium Term","Fbar","1.15295455561144"
+"GFCM.HCR.modif","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"GFCM.HCR.modif","Short Term","risk","0.072"
+"GFCM.HCR.modif","Medium Term","risk","1"
+"GFCM.HCR.modif","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Fmsy2020","Short Term","ssb","106906.458482305"
+"Fmsy2020","Medium Term","ssb","144223.853657633"
+"Fmsy2020","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Fmsy2020","Short Term","catch","21330.7408433134"
+"Fmsy2020","Medium Term","catch","34594.5816111278"
+"Fmsy2020","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Fmsy2020","Short Term","Fbar","1.07466543996265"
+"Fmsy2020","Medium Term","Fbar","0.845270991317881"
+"Fmsy2020","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Fmsy2020","Short Term","risk","0.224"
+"Fmsy2020","Medium Term","risk","0.332"
+"Fmsy2020","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Fmsy2025","Short Term","ssb","96138.1721696437"
+"Fmsy2025","Medium Term","ssb","135138.287446409"
+"Fmsy2025","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Fmsy2025","Short Term","catch","25482.9248630696"
+"Fmsy2025","Medium Term","catch","30640.4727662266"
+"Fmsy2025","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Fmsy2025","Short Term","Fbar","1.36785289947717"
+"Fmsy2025","Medium Term","Fbar","0.820340646149611"
+"Fmsy2025","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Fmsy2025","Short Term","risk","0.304"
+"Fmsy2025","Medium Term","risk","0.384"
+"Fmsy2025","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Chistmin","Short Term","ssb","130352.614953111"
+"Chistmin","Medium Term","ssb","206322.548814517"
+"Chistmin","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Chistmin","Short Term","catch","10282.1105765377"
+"Chistmin","Medium Term","catch","4848.64552058088"
+"Chistmin","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Chistmin","Short Term","Fbar","0.553740445470322"
+"Chistmin","Medium Term","Fbar","0.0308779802685549"
+"Chistmin","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Chistmin","Short Term","risk","0.072"
+"Chistmin","Medium Term","risk","0.064"
+"Chistmin","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C2014","Short Term","ssb","69511.1839222525"
+"C2014","Medium Term","ssb","39949.1780868371"
+"C2014","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C2014","Short Term","catch","31836.5840824636"
+"C2014","Medium Term","catch","31678.4103746039"
+"C2014","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C2014","Short Term","Fbar","2.91781134593336"
+"C2014","Medium Term","Fbar","2.51774919579741"
+"C2014","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C2014","Short Term","risk","0.44"
+"C2014","Medium Term","risk","1"
+"C2014","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C5red","Short Term","ssb","78942.9114812422"
+"C5red","Medium Term","ssb","105241.537824589"
+"C5red","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C5red","Short Term","catch","27221.3442520083"
+"C5red","Medium Term","catch","26412.7035610762"
+"C5red","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C5red","Short Term","Fbar","2.0265632263992"
+"C5red","Medium Term","Fbar","1.30911472753725"
+"C5red","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C5red","Short Term","risk","0.372"
+"C5red","Medium Term","risk","0.472"
+"C5red","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C10red","Short Term","ssb","86147.0396763881"
+"C10red","Medium Term","ssb","128482.767180693"
+"C10red","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C10red","Short Term","catch","25978.7160952463"
+"C10red","Medium Term","catch","29263.9636190481"
+"C10red","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C10red","Short Term","Fbar","1.66812069324483"
+"C10red","Medium Term","Fbar","1.00369532421631"
+"C10red","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C10red","Short Term","risk","0.34"
+"C10red","Medium Term","risk","0.444"
+"C10red","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C20red","Short Term","ssb","98692.1709865173"
+"C20red","Medium Term","ssb","135669.328699211"
+"C20red","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C20red","Short Term","catch","21541.3168407541"
+"C20red","Medium Term","catch","33183.5126447223"
+"C20red","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C20red","Short Term","Fbar","1.28138876318906"
+"C20red","Medium Term","Fbar","0.89073261363728"
+"C20red","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C20red","Short Term","risk","0.276"
+"C20red","Medium Term","risk","0.364"
+"C20red","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C50red","Short Term","ssb","119386.400416168"
+"C50red","Medium Term","ssb","148778.209265943"
+"C50red","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C50red","Short Term","catch","12419.7247304194"
+"C50red","Medium Term","catch","38171.9885017542"
+"C50red","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C50red","Short Term","Fbar","0.757411748796318"
+"C50red","Medium Term","Fbar","0.834115106542508"
+"C50red","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"C50red","Short Term","risk","0.108"
+"C50red","Medium Term","risk","0.216"
+"C50red","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Bpa.Fmsy2020","Short Term","ssb","133452.42452883"
+"Bpa.Fmsy2020","Medium Term","ssb","94683.8120187775"
+"Bpa.Fmsy2020","Long Term","ssb","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Bpa.Fmsy2020","Short Term","catch","12458.1340046766"
+"Bpa.Fmsy2020","Medium Term","catch","45093.2813020619"
+"Bpa.Fmsy2020","Long Term","catch","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Bpa.Fmsy2020","Short Term","Fbar","0.554472412721725"
+"Bpa.Fmsy2020","Medium Term","Fbar","1.21778501349156"
+"Bpa.Fmsy2020","Long Term","Fbar","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
+  subscript out of bounds
+"
+"Bpa.Fmsy2020","Short Term","risk","0.072"
+"Bpa.Fmsy2020","Medium Term","risk","1"
+"Bpa.Fmsy2020","Long Term","risk","Error in x@.Data[i, j, k, l, m, n, drop = FALSE] : 
   subscript out of bounds
 "
