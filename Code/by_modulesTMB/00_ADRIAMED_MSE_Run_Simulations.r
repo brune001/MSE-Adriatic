@@ -35,7 +35,7 @@ print(args)
 argsOrig <- args
 scenario <- strsplit(args,"=")[[1]][2]
 
-scenario <- "GFCM.HCR"
+#scenario <- "GFCM.HCR"
 
 #rm(list=ls())
 library(FLash)

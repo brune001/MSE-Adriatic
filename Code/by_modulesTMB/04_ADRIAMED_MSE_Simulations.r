@@ -30,7 +30,7 @@ harvest(pstk)[,vy]       <-  sweep (harvest(pstk)[,vy] , c(1,3:6) , sel.change ,
 #########################################################
 # go fish!
 escapeRuns <- numeric()
-for(i in ac(2024:2036)){# vy[-length(vy)]){   #a[-(15:16)]
+for(i in vy[-length(vy)]){   #a[-(15:16)]
   ## i <- vy[-length(vy)][1]
   print(i)
   gc()
