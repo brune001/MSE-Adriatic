@@ -29,7 +29,7 @@ harvest(pstk)[,vy]       <-  sweep (harvest(pstk)[,vy] , c(1,3:6) , sel.change ,
 
 #########################################################
 # go fish!
-
+escapeRuns <- numeric()
 for(i in vy[-length(vy)]){   #a[-(15:16)]
   ## i <- vy[-length(vy)][1]
   print(i)
@@ -89,16 +89,20 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   sam0.ctrl <- sam.ctrl
   sam0.ctrl@range["maxyear"]  <- iay-1
   
+  continueRuns        <- which(!(1:dims(stk0)$iter) %in% escapeRuns)
   if (iay == iy)  res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,return.sam=T)
   if (iay > iy)   res <- FLSAM.MSE(stk0,idx0,sam0.ctrl,starting.sam=res,return.sam=T)
   
   trouble <- data.frame(iter = 1:it , failure =  unlist(lapply(res , function(x) is.na(x))))
   trouble <- trouble[trouble$failure == T,]
   #if (dim(trouble)[1] > 0) for (ii in trouble$iter) res[[ii]] <-  FLSAM(iter(stk0,ii),FLIndices(lapply(idx0 , function(x) iter(x,ii))),sam0.ctrl)
-  if (dim(trouble)[1] == 1)
-    res[[trouble$iter]] <-  FLSAM(iter(stk0,trouble$iter),
+  if (dim(trouble)[1] == 1){
+    res[[trouble$iter]] <-  try(FLSAM(iter(stk0,trouble$iter),
                                   FLIndices(lapply(idx0 , function(x) iter(x,trouble$iter))),
-                                  sam0.ctrl)
+                                  sam0.ctrl,silent=T))
+    if(class(res[[trouble$iter]]) == "try-error")
+      res[[trouble$iter]] <- NA
+  }
   if (dim(trouble)[1] > 1){
     resTrouble          <- FLSAM.MSE(iter(stk0,trouble$iter),
                                      FLIndices(lapply(idx0,function(x) iter(x,trouble$iter))),
@@ -107,13 +111,18 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
     for(ii in trouble$iter){
       res[[ii]] <-  resTrouble[[counter]]
       counter <- counter + 1
+      
     }
   }
 #
   
   for(ii in 1:it){
-    iter(stk0@harvest,ii) <- res[[ii]]@harvest
-    iter(stk0@stock.n,ii) <- res[[ii]]@stock.n
+    if(!is.na(res[[ii]])){
+      iter(stk0@harvest,ii) <- res[[ii]]@harvest
+      iter(stk0@stock.n,ii) <- res[[ii]]@stock.n
+    } else {
+      escapeRuns <- sort(unique(c(escapeRuns,ii)))
+    }
   }
       
 ### STF ON THE PERCIEVED STOCK TO PRODUCE AND ADVICE
