@@ -147,7 +147,7 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
   stkTmpAll <- stf(stk0, 2)
   require(doParallel)
   ncores <- detectCores()-1
-  ncores <- ifelse(iters<ncores,iters,ncores)
+  ncores <- ifelse(dims(stk0)$iter<ncores,dims(stk0)$iter,ncores)
   cla <- makeCluster(ncores) #set up nodes
   clusterEvalQ(cla,library(FLash))
   registerDoParallel(cla)
@@ -206,7 +206,7 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
 
 # save at each time step
 restosave <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC)
-#save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,".RData"))
+save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,".RData"))
 
 }  # end of year loops
 
