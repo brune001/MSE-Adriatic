@@ -35,13 +35,15 @@ print(args)
 argsOrig <- args
 scenario <- strsplit(args,"=")[[1]][2]
 
+scenario <- "GFCM.HCR"
+
 #rm(list=ls())
 library(FLash)
 #library(FLasher)
 library(FLAssess)
 library(ggplotFL)
 library(FLBRP)
-library(FLSAM)
+library(FLSAM)  #devtools::install_github("flr/FLSAM", ref="develop_V2")
 library(FLCore)
 library(FLEDA)
 library(doBy)

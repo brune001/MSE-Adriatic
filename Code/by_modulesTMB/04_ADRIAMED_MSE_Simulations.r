@@ -30,7 +30,7 @@ harvest(pstk)[,vy]       <-  sweep (harvest(pstk)[,vy] , c(1,3:6) , sel.change ,
 #########################################################
 # go fish!
 escapeRuns <- numeric()
-for(i in vy[-length(vy)]){   #a[-(15:16)]
+for(i in ac(2024:2036)){# vy[-length(vy)]){   #a[-(15:16)]
   ## i <- vy[-length(vy)][1]
   print(i)
   gc()
@@ -143,28 +143,57 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
   
   # doing the advice separately for each iteration in order to allow for 
   # different types of target to be set for different iterations
-  stkTmpAll <- stf(stk0, 2)
-  for (its in 1:it)
-        {
-        target <-  HCR(iter(stk0,its) , mgt.target )
-                  # add extra reduction in F when part of the scenario
-        if (!is.na(addFred))  target$val$y2     <- (1-addFred) * target$val$y2
-         
-        # create the control object
-        ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity= target$quant, val=c((target$val$y1), (target$val$y2)), rel.year = target$rel))
-        # populate the iteration specific values
-        ## Short term forecast object 2 years of stk0
-        stkTmp              <- stkTmpAll[,,,,,its]
-        # project forward with the control you want and the SR rel you defined above, with residuals
-        stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=iter(srSTF,its)  ,maxF = 10)
-        
-        
-         # update objects storing the basis for the advice
-         TAC[,ac(iay+1),,,,its]   <- catch(stkTmp)[,ac(iay+1)]
-         SSBad[,ac(iay+1),,,,its] <- ssb(stkTmp)[,ac(iay+1)]
-         Fad[,ac(iay+1),,,,its]   <- fbar(stkTmp)[,ac(iay+1)]
-       }
 
+  stkTmpAll <- stf(stk0, 2)
+  require(doParallel)
+  ncores <- detectCores()-1
+  ncores <- ifelse(iters<ncores,iters,ncores)
+  cla <- makeCluster(ncores) #set up nodes
+  clusterEvalQ(cla,library(FLash))
+  registerDoParallel(cla)
+
+  target <- foreach(its = 1:it) %dopar% HCR(stk0[,,,,,its],mgt.target)
+  for(its in 1:it){
+    if (!is.na(addFred))  target[[its]]$val$y2     <- (1-addFred) * target[[its]]$val$y2
+  }
+  ctrl  <- foreach(its = 1:it) %dopar% fwdControl(data.frame(year=c(iay, iay+1), quantity= target[[its]]$quant, val=c((target[[its]]$val$y1), (target[[its]]$val$y2)), rel.year = target[[its]]$rel))
+  stkTmp <- foreach(its = 1:it) %dopar% fwd(stkTmpAll[,,,,,its],ctrl=ctrl[[its]],sr=iter(srSTF,its),maxF=10)
+  for (its in 1:it){
+         TAC[,ac(iay+1),,,,its]   <- catch(stkTmp[[its]])[,ac(iay+1)]
+         SSBad[,ac(iay+1),,,,its] <- ssb(stkTmp[[its]])[,ac(iay+1)]
+         Fad[,ac(iay+1),,,,its]   <- fbar(stkTmp[[its]])[,ac(iay+1)]
+  }
+  if("doParallel" %in% (.packages()))
+    detach("package:doParallel",unload=TRUE)
+  if("foreach" %in% (.packages()))
+    detach("package:foreach",unload=TRUE)
+  if("iterators" %in% (.packages()))
+    detach("package:iterators",unload=TRUE)
+
+  stopCluster(cla)
+
+#  start.time <- Sys.time()
+#  for (its in 1:it)
+#        {
+#        target <-  HCR(iter(stk0,its) , mgt.target )
+#                  # add extra reduction in F when part of the scenario
+#        if (!is.na(addFred))  target$val$y2     <- (1-addFred) * target$val$y2
+#
+#        # create the control object
+#        ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity= target$quant, val=c((target$val$y1), (target$val$y2)), rel.year = target$rel))
+#        # populate the iteration specific values
+#        ## Short term forecast object 2 years of stk0
+#        stkTmp              <- stkTmpAll[,,,,,its]
+#        # project forward with the control you want and the SR rel you defined above, with residuals
+#        stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=iter(srSTF,its)  ,maxF = 10)
+#
+#
+#         # update objects storing the basis for the advice
+#         TAC[,ac(iay+1),,,,its]   <- catch(stkTmp)[,ac(iay+1)]
+#         SSBad[,ac(iay+1),,,,its] <- ssb(stkTmp)[,ac(iay+1)]
+#         Fad[,ac(iay+1),,,,its]   <- fbar(stkTmp)[,ac(iay+1)]
+#       }
+#     difftime(Sys.time(),start.time)
  ### UPDATE THE OM BASED ON THE TAC ADVICE (with on year lag)
  dnms <- list(year=c(iay), c("min", "val", "max"),iter=1:it)
  arr0 <- array(NA, dimnames=dnms, dim=unlist(lapply(dnms, length)))
