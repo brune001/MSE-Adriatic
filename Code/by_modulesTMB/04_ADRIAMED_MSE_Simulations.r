@@ -57,6 +57,8 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   idx0 <- window(idx , end = iay-1)
   # COMPUTE SURVEY INDICES BASED ON THE ESTIMTAED CATCHABILITY AND ADD UNCERTAINTY
   # NOTE THAT HISTORICAL PART OF THE TIME SERIES ARE NOT MODIFIED
+
+
   if (iay > iy) # don't do that for the first year because it correspond to the actual year the current assessment was carried out
   {
       for (idx.nb in 1:length(idx))
@@ -115,7 +117,7 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
     }
   }
 #
-  
+
   for(ii in 1:it){
     if(!is.na(res[[ii]])){
       iter(stk0@harvest,ii) <- res[[ii]]@harvest
@@ -124,7 +126,6 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
       escapeRuns <- sort(unique(c(escapeRuns,ii)))
     }
   }
-      
 ### STF ON THE PERCIEVED STOCK TO PRODUCE AND ADVICE
 # 
 #  define the recruitment assumption to use in for the short term
@@ -142,7 +143,7 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
   
   # doing the advice separately for each iteration in order to allow for 
   # different types of target to be set for different iterations
-  
+  stkTmpAll <- stf(stk0, 2)
   for (its in 1:it)
         {
         target <-  HCR(iter(stk0,its) , mgt.target )
@@ -153,29 +154,30 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
         ctrl <- fwdControl(data.frame(year=c(iay, iay+1), quantity= target$quant, val=c((target$val$y1), (target$val$y2)), rel.year = target$rel))
         # populate the iteration specific values
         ## Short term forecast object 2 years of stk0
-        stkTmp <- stf(iter(stk0,its), 2)
+        stkTmp              <- stkTmpAll[,,,,,its]
         # project forward with the control you want and the SR rel you defined above, with residuals
-        stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=iter(srSTF,its)  ,maxF = 10) 
+        stkTmp <- fwd(stkTmp, ctrl=ctrl, sr=iter(srSTF,its)  ,maxF = 10)
         
         
          # update objects storing the basis for the advice
-         iter(TAC[,ac(iay+1)],its)   <- catch(stkTmp)[,ac(iay+1)]
-         iter(SSBad[,ac(iay+1)],its) <- ssb(stkTmp)[,ac(iay+1)]
-         iter(Fad[,ac(iay+1)],its)   <- fbar(stkTmp)[,ac(iay+1)]
+         TAC[,ac(iay+1),,,,its]   <- catch(stkTmp)[,ac(iay+1)]
+         SSBad[,ac(iay+1),,,,its] <- ssb(stkTmp)[,ac(iay+1)]
+         Fad[,ac(iay+1),,,,its]   <- fbar(stkTmp)[,ac(iay+1)]
        }
 
-### UPDATE THE OM BASED ON THE TAC ADVICE (with on year lag)
+ ### UPDATE THE OM BASED ON THE TAC ADVICE (with on year lag)
  dnms <- list(year=c(iay), c("min", "val", "max"),iter=1:it)
  arr0 <- array(NA, dimnames=dnms, dim=unlist(lapply(dnms, length)))
  arr0[,"val",] <- TAC[,ac(iay)]
  ctrlOM <- fwdControl(data.frame(year=c(iay), quantity=c('catch'), val=c(iterMeans(TAC[,ac(iay)])@.Data)))
  ctrlOM@trgtArray <- arr0
  # update pstk with stkTmp
- pstk <- fwd(pstk, ctrl=ctrlOM, sr=sr, sr.residuals = exp(sr.res[,ac(iay)]), sr.residuals.mult = TRUE , maxF = 10) #
+  pstk <- fwd(pstk, ctrl=ctrlOM, sr=sr, sr.residuals = exp(sr.res[,ac(iay)]), sr.residuals.mult = TRUE , maxF = 10)
 
 
 # save at each time step
 restosave <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC)
-save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,".RData"))
+#save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,".RData"))
 
 }  # end of year loops
+
