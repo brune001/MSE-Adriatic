@@ -69,11 +69,11 @@ source('./Code/by_modulesTMB/MSE_functions.R')
 
 
 
-#species <- "ANCHOVY"  # "ANCHOVY" or "SARDINE"
-#assess.name <- "Anchovy GSA 17-18_tbmSAM"
+species <- "ANCHOVY"  # "ANCHOVY" or "SARDINE"
+assess.name <- "Anchovy GSA 17-18_tbmSAM"
 ###
-species <- "SARDINE"  # "ANCHOVY" or "SARDINE"
-assess.name <- "Sardine GSA 17-18_tbmSAM"
+#species <- "SARDINE"  # "ANCHOVY" or "SARDINE"
+#assess.name <- "Sardine GSA 17-18_tbmSAM"
 #####
 
 
