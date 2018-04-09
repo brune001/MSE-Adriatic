@@ -111,9 +111,12 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
                                      sam0.ctrl,return.sam=T)
     counter <- 1
     for(ii in trouble$iter){
-      res[[ii]] <-  resTrouble[[counter]]
+      if(is.na(resTrouble[[counter]])){
+        res[[ii]] <- new("FLSAM")
+      } else {
+        res[[ii]] <-  resTrouble[[counter]]
+      }
       counter <- counter + 1
-      
     }
   }
 #

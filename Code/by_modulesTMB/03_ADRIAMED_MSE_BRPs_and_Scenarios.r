@@ -287,6 +287,20 @@ Fmsy2020 <- list( name = "Fmsy2020" ,
                   spatial.closure = F ,
                   additionnal.F.reduction = NA
                 )    
+                
+Fmsy2021 <- list( name = "Fmsy2021" ,
+                  target = list(Yr.targ = 2021 , Ftarget = Fmsy) ,
+                  HCR =  HCR.time.target.F,
+                  spatial.closure = F ,
+                  additionnal.F.reduction = NA
+                )
+                
+Fmsy2023 <- list( name = "Fmsy2023" ,
+                  target = list(Yr.targ = 2023 , Ftarget = Fmsy) ,
+                  HCR =  HCR.time.target.F,
+                  spatial.closure = F ,
+                  additionnal.F.reduction = NA
+                )
 
 
 # Linear reduction of F towards FMSY by 2020
