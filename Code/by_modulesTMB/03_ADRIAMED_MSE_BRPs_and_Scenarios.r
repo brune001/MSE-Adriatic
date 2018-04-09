@@ -200,13 +200,13 @@ HCR.Bpa.Fmsy<- function(stoc, target)
                   btarget <- target$Btarget 
                   
                   # first target is Btarget in the first year
-                  if(ynow  <ytarg) {
+                  if(ynow  <(ytarg-1)) {
                   
                                       # find the Fbar which brings SSB at Bpa
                                       targ<-list()
                                       targ$quant = c("f","ssb")
                                       B.annual.change <- (btarget - blast) / (ytarg - ynow)
-                                      btargetnow <-  blast + 2*B.annual.change
+                                      btargetnow <-  min( blast + 2*B.annual.change , btarget)
                                       targ$val = list(y1 = c(fbar(stoc)[,ac(range(stoc)["maxyear"])]) , y2 = c(btargetnow))
                                       targ$rel = c(NA,NA)
                                       } else {               # apply Fmsy
