@@ -35,7 +35,8 @@ print(args)
 argsOrig <- args
 scenario <- strsplit(args,"=")[[1]][2]
 
-#scenario <- "GFCM.HCR"
+#scenario <- "Bpa.Fmsy2020"
+#scenario <- "GFCM.HCR.modif"
 
 #rm(list=ls())
 library(FLash)

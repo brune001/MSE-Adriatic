@@ -6,6 +6,8 @@ R CMD BATCH '--args scenario=F.sqEMERGENCY4'  ~/MSE-Adriatic/Code/by_modulesTMB/
 R CMD BATCH '--args scenario=F.sqEMERGENCY8'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/F.sqEMERGENCY8.Rout&
 
 R CMD BATCH '--args scenario=Fmsy2020'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/Fmsy2020.Rout&
+R CMD BATCH '--args scenario=Fmsy2021'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/Fmsy2021.Rout&
+R CMD BATCH '--args scenario=Fmsy2023'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/Fmsy2023.Rout&
 R CMD BATCH '--args scenario=Fmsy2025'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/Fmsy2025.Rout&
 
 R CMD BATCH '--args scenario=C2014'     ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/C2014.Rout&
@@ -20,3 +22,12 @@ R CMD BATCH '--args scenario=GFCM.HCR'        ~/MSE-Adriatic/Code/by_modulesTMB/
 R CMD BATCH '--args scenario=GFCM.HCR.modif'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/GFCM.HCR.modif.Rout&
 
 R CMD BATCH '--args scenario=Bpa.Fmsy2020'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/Bpa.Fmsy2020.Rout&
+
+
+
+
+#-to run
+R CMD BATCH '--args scenario=Fmsy2021'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/Fmsy2021.Rout&
+R CMD BATCH '--args scenario=Fmsy2023'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/Fmsy2023.Rout&
+R CMD BATCH '--args scenario=GFCM.HCR.modif'  ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/GFCM.HCR.modif.Rout&
+R CMD BATCH '--args scenario=C2014'     ~/MSE-Adriatic/Code/by_modulesTMB/00_ADRIAMED_MSE_Run_Simulations.r ~/MSE-Adriatic/Results/C2014.Rout&
