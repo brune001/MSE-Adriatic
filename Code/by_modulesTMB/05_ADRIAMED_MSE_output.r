@@ -44,7 +44,7 @@ source('./Code/by_modulesTMB/03_ADRIAMED_MSE_BRPs_and_Scenarios.r')
 
 
 
-sc <- c("F.low.NO_SAM")
+sc <- c("F.sq","F.msy","F.low","GFCM.HCR","GFCM.HCR.modif","Fmsy2020","Fmsy2025","Chistmin","C2014","C5red","C10red","C20red", "C50red","Bpa.Fmsy2020")
 
 
 
