@@ -35,13 +35,15 @@ print(args)
 argsOrig <- args
 scenario <- strsplit(args,"=")[[1]][2]
 
+#scenario <- "GFCM.HCR"
+
 #rm(list=ls())
 library(FLash)
 #library(FLasher)
 library(FLAssess)
 library(ggplotFL)
 library(FLBRP)
-library(FLSAM)
+library(FLSAM)  #devtools::install_github("flr/FLSAM", ref="develop_V2")
 library(FLCore)
 library(FLEDA)
 library(doBy)
@@ -69,11 +71,11 @@ source('./Code/by_modulesTMB/MSE_functions.R')
 
 
 
-#species <- "ANCHOVY"  # "ANCHOVY" or "SARDINE"
-#assess.name <- "Anchovy GSA 17-18_tbmSAM"
+species <- "ANCHOVY"  # "ANCHOVY" or "SARDINE"
+assess.name <- "Anchovy GSA 17-18_tbmSAM"
 ###
-species <- "SARDINE"  # "ANCHOVY" or "SARDINE"
-assess.name <- "Sardine GSA 17-18_tbmSAM"
+#species <- "SARDINE"  # "ANCHOVY" or "SARDINE"
+#assess.name <- "Sardine GSA 17-18_tbmSAM"
 #####
 
 
