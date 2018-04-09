@@ -102,8 +102,11 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
     tres    <-  try(FLSAM(iter(stk0,trouble$iter),
                     FLIndices(lapply(idx0 , function(x) iter(x,trouble$iter))),
                     sam0.ctrl,silent=T))
-    if(class(tres)=="try-error")
+    if(class(tres)=="try-error"){
       res[[trouble$iter]] <- new("FLSAM")
+    } else {
+      res[[trouble$iter]] <- tres
+    }
   }
   if (dim(trouble)[1] > 1){
     resTrouble          <- FLSAM.MSE(iter(stk0,trouble$iter),
