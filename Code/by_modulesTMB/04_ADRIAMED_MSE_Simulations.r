@@ -1,5 +1,5 @@
 
-load(fname)
+load(sname)
 pstk  <- pstksave
 cat("running",run,"MSE\n")
  # sc <- "F.low"

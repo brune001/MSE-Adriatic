@@ -405,9 +405,9 @@ Bpa.Fmsy2020 <- list( name= "Bpa.Fmsy2020",
 ########################################
 # combine them in a list
 
-management.scenarios <- list( F.sq,F.msy,F.low,Fmsy2021,Fmsy2023,
+management.scenarios <- list( F.sq,F.msy,F.low,
                               F.sqEMERGENCY4 , F.sqEMERGENCY8 ,
-                              Fmsy2020,Fmsy2025,  
+                              Fmsy2020,Fmsy2025, Fmsy2021,Fmsy2023,
                               C2014 , Chistmin,
                               C5red, C10red,C20red, C50red,
                               GFCM.HCR, GFCM.HCR.modif,
