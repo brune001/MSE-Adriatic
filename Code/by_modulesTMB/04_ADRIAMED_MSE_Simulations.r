@@ -51,7 +51,8 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   # add 1 to everything to avoid zeros
   catch.n(stk0) <- catch.n(stk0) * catch.dev[,vy0] # avoid zeros
 
-
+  #- Correct for the cases where you have a zero-catch
+  catch.n(stk0)@.Data[catch.n(stk0)<100] <- -1
 
   # CREATE PERCEIVED TUNNING INDICES
   idx0 <- window(idx , end = iay-1)
@@ -136,7 +137,8 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
 # 
 #  define the recruitment assumption to use in for the short term
 mean_rec <- exp(yearMeans(log(rec(stk0)[,ac(iay-c(1:3))])))
-if(!exists("srSTF")) srSTF <- fmle(as.FLSR(stk0, model="geomean"))
+#if(!exists("srSTF")) srSTF <- fmle(as.FLSR(stk0, model="geomean"))
+if(!exists("srSTF")) srSTF <- fmle(as.FLSR(stk0, model="segreg"), fixed=list(b=mean(ssb(stk0[,ac(1975:2016)],na.rm=T)))
 for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
  
  
@@ -225,7 +227,7 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
 
 # save at each time step
 restosave <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC,trouble)
-save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,".RData"))
+save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,"V2.RData"))
 
 }  # end of year loops
 

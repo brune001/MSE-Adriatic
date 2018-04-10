@@ -263,7 +263,7 @@ F.msy <- list( name = "F.msy" ,
              spatial.closure = F ,
              additionnal.F.reduction = NA
            )    
-           
+
 F40 <- list( name = "F40" ,
              target = list(Ftarget = 0.4) ,
              HCR =  HCR.cstF ,
