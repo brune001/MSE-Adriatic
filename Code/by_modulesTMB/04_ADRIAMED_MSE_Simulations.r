@@ -151,6 +151,9 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
   # different types of target to be set for different iterations
 
   stkTmpAll <- stf(stk0, 2)
+  srSTFAll <- list()
+  for(its in 1:it)
+    srSTFAll[[its]] <- iter(srSTF,its)
   require(doParallel)
   ncores <- detectCores()-1
   ncores <- ifelse(dims(stk0)$iter<ncores,dims(stk0)$iter,ncores)
@@ -163,7 +166,17 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
     if (!is.na(addFred))  target[[its]]$val$y2     <- (1-addFred) * target[[its]]$val$y2
   }
   ctrl  <- foreach(its = 1:it) %dopar% fwdControl(data.frame(year=c(iay, iay+1), quantity= target[[its]]$quant, val=c((target[[its]]$val$y1), (target[[its]]$val$y2)), rel.year = target[[its]]$rel))
-  stkTmp <- foreach(its = 1:it) %dopar% fwd(stkTmpAll[,,,,,its],ctrl=ctrl[[its]],sr=iter(srSTF,its),maxF=10)
+  stkTmp <- foreach(its = 1:it) %dopar% fwd(stkTmpAll[,,,,,its],ctrl=ctrl[[its]],sr=srSTFAll[[its]],maxF=10)
+  if(ctrl[[1]]@target[2,"quantity"]=="ssb"){
+    ssbAchieved <- unlist(lapply(stkTmp,function(x){ssb(x)[,ac(iay+1)]}))
+    ssbTarget <- unlist(lapply(ctrl,function(y)y@target[2,"val"]))
+    notAchieved <- which(ssbAchieved < ssbTarget)
+    if(length(notAchieved)>0){
+      ctrl[notAchieved]  <- foreach(its = notAchieved) %dopar% fwdControl(data.frame(year=c(iay, iay+1), quantity= c(target[[its]]$quant[1],"f"), val=c((target[[its]]$val$y1), 0), rel.year = target[[its]]$rel))
+    }
+    stkTmp <- foreach(its = 1:it) %dopar% fwd(stkTmpAll[,,,,,its],ctrl=ctrl[[its]],sr=srSTFAll[[its]],maxF=10)
+  }
+
   for (its in 1:it){
          TAC[,ac(iay+1),,,,its]   <- catch(stkTmp[[its]])[,ac(iay+1)]
          SSBad[,ac(iay+1),,,,its] <- ssb(stkTmp[[its]])[,ac(iay+1)]
