@@ -44,7 +44,7 @@ source('./Code/by_modulesTMB/03_ADRIAMED_MSE_BRPs_and_Scenarios.r')
 
 
 
-sc <- c("F.sq","F.msy","F.low","GFCM.HCR","GFCM.HCR.modif","Fmsy2020","Fmsy2025","Chistmin","C2014","C5red","C10red","C20red", "C50red","Bpa.Fmsy2020")
+sc <- names(management.scenarios)
 
 
 
@@ -54,7 +54,7 @@ sc <- c("F.sq","F.msy","F.low","GFCM.HCR","GFCM.HCR.modif","Fmsy2020","Fmsy2025"
 
 ST <- ac(2017:2021)
 MT <- ac(2022:2027)
-LT <- ac(2028:2036)
+LT <- ac(2028:2035)
 
 
 #==============================================================================

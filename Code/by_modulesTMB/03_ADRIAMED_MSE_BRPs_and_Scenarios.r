@@ -200,13 +200,13 @@ HCR.Bpa.Fmsy<- function(stoc, target)
                   btarget <- target$Btarget 
                   
                   # first target is Btarget in the first year
-                  if(ynow  <(ytarg-1)) {
+                  if(ynow  <ytarg) {
                   
                                       # find the Fbar which brings SSB at Bpa
                                       targ<-list()
                                       targ$quant = c("f","ssb")
                                       B.annual.change <- (btarget - blast) / (ytarg - ynow)
-                                      btargetnow <-  min( blast + 2*B.annual.change , btarget)
+                                      btargetnow <-  blast + 2*B.annual.change
                                       targ$val = list(y1 = c(fbar(stoc)[,ac(range(stoc)["maxyear"])]) , y2 = c(btargetnow))
                                       targ$rel = c(NA,NA)
                                       } else {               # apply Fmsy
@@ -263,6 +263,82 @@ F.msy <- list( name = "F.msy" ,
              spatial.closure = F ,
              additionnal.F.reduction = NA
            )    
+           
+F40 <- list( name = "F40" ,
+             target = list(Ftarget = 0.4) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F42 <- list( name = "F42" ,
+             target = list(Ftarget = 0.42) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F44 <- list( name = "F44" ,
+             target = list(Ftarget = 0.44) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F46 <- list( name = "F46" ,
+             target = list(Ftarget = 0.46) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F48 <- list( name = "F48" ,
+             target = list(Ftarget = 0.48) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F50 <- list( name = "F50" ,
+             target = list(Ftarget = 0.50) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F52 <- list( name = "F52" ,
+             target = list(Ftarget = 0.52) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F54 <- list( name = "F54" ,
+             target = list(Ftarget = 0.54) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F56 <- list( name = "F56" ,
+             target = list(Ftarget = 0.56) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F58 <- list( name = "F58" ,
+             target = list(Ftarget = 0.58) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F60 <- list( name = "F60" ,
+             target = list(Ftarget = 0.60) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+F62 <- list( name = "F62" ,
+             target = list(Ftarget = 0.62) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
+           )
+
+           
+           
 
 
 # scenario Flow :  Ftaret = 0.10
@@ -409,6 +485,7 @@ management.scenarios <- list( F.sq,F.msy,F.low,
                               F.sqEMERGENCY4 , F.sqEMERGENCY8 ,
                               Fmsy2020,Fmsy2025, Fmsy2021,Fmsy2023,
                               C2014 , Chistmin,
+                              F40,F42,F44,F46,F48,F50,F52,F54,F56,F58,F60,F62,
                               C5red, C10red,C20red, C50red,
                               GFCM.HCR, GFCM.HCR.modif,
                               Bpa.Fmsy2020)
