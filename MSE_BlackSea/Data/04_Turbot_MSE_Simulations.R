@@ -59,7 +59,7 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   # COMPUTE SURVEY INDICES BASED ON THE ESTIMTAED CATCHABILITY AND ADD UNCERTAINTY
   # NOTE THAT HISTORICAL PART OF THE TIME SERIES ARE NOT MODIFIED
   
-  idx0[[3]] <- window(idx0[[3]],end=2006)  
+  
   if (iay > iy) # don't do that for the first year because it correspond to the actual year the current assessment was carried out
   {
     for (idx.nb in 1:length(idx))
