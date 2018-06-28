@@ -24,28 +24,19 @@
 # February/MARCH 2017
 # Updated for 2017 GFCM WKMSE, using WGSAD2016 assessment data (last year=dy=2015)
 # FINAL VERSION UPLOADED ONTO GFCM SERVER
-
-
+#Modified by Max Cardinale for GFCM
 ################################################################################
 #  define BRPs
 ################################################################################
-
 
 if (species == "Turbot")
 {
   blim  <- 3535
   bpa   <- 4949
-  Fmsy  <- 0.26                                                   
+  Fmsy  <- 0.26
+  CTAC <- 644
+  CTAC50 <- 945
 }
-
-if (species == "SARDINE")
-{
-  blim  <- 125318
-  bpa   <- blim*2
-  Fmsy  <- 0.47                                                   
-}
-
-
 
 ################################################################################
 # define the function for the HCRs
@@ -99,7 +90,6 @@ HCR.cstC <- function(stoc, target)
   return(targ)
 }
 
-
 # to apply an annual X% decrease in the catches until B>=Bpa & F<=Fmsy
 HCR.Cred <- function(stoc, target)
 {     
@@ -124,8 +114,7 @@ HCR.Cred <- function(stoc, target)
     # apply the HCR
   }
   
-  
-  
+
   return(targ)                 
 }
 
@@ -184,8 +173,6 @@ HCR.gfcm.modified <- function(stoc, target)
 } 
 
 
-
-
 # to first go  to Bpa  in a givne target year and then apply the HCR GFCM
 HCR.Bpa.Fmsy<- function(stoc, target)
 {
@@ -218,14 +205,9 @@ HCR.Bpa.Fmsy<- function(stoc, target)
   return(targ)
 }                  
 
-
-
-
 ################################################################################
 # define scenarios 1 by 1 
 ################################################################################
-
-
 
 ################################################################################
 #----- Constant F scenarios ------------------------
@@ -240,19 +222,6 @@ F.sq <- list( name = "F.sq" ,
               additionnal.F.reduction = NA
 )    
 
-F.sqEMERGENCY4 <- list( name = "F.sqEMERGENCY4" ,
-                        target = list(Ftarget = mean(c(fbar(stk)[,ac((dy-2):dy)]))) ,
-                        HCR =  HCR.cstF ,
-                        spatial.closure = T ,
-                        additionnal.F.reduction = 0.04
-) 
-
-F.sqEMERGENCY8 <- list( name = "F.sqEMERGENCY8" ,
-                        target = list(Ftarget = mean(c(fbar(stk)[,ac((dy-2):dy)]))) ,
-                        HCR =  HCR.cstF ,
-                        spatial.closure = T ,
-                        additionnal.F.reduction = 0.08
-)            
 
 # scenario Fmsy :
 # basis Ftarget = Fmsy used to give advice starting in 2018
@@ -264,211 +233,47 @@ F.msy <- list( name = "F.msy" ,
                additionnal.F.reduction = NA
 )    
 
-F40 <- list( name = "F40" ,
-             target = list(Ftarget = 0.4) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F42 <- list( name = "F42" ,
-             target = list(Ftarget = 0.42) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F44 <- list( name = "F44" ,
-             target = list(Ftarget = 0.44) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F46 <- list( name = "F46" ,
-             target = list(Ftarget = 0.46) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F48 <- list( name = "F48" ,
-             target = list(Ftarget = 0.48) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F50 <- list( name = "F50" ,
-             target = list(Ftarget = 0.50) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F52 <- list( name = "F52" ,
-             target = list(Ftarget = 0.52) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F54 <- list( name = "F54" ,
-             target = list(Ftarget = 0.54) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F56 <- list( name = "F56" ,
-             target = list(Ftarget = 0.56) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F58 <- list( name = "F58" ,
-             target = list(Ftarget = 0.58) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F60 <- list( name = "F60" ,
-             target = list(Ftarget = 0.60) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-F62 <- list( name = "F62" ,
-             target = list(Ftarget = 0.62) ,
-             HCR =  HCR.cstF ,
-             spatial.closure = F ,
-             additionnal.F.reduction = NA
-)
-
-
-
-
-
-# scenario Flow :  Ftaret = 0.10
-# basis Ftarget = try a low F to see how the simulation behave
-
-F.low <- list( name = "F.low" ,
-               target = list(Ftarget = 0.1) ,
-               HCR =  HCR.cstF ,
-               spatial.closure = F ,
-               additionnal.F.reduction = NA
-)    
-
 
 ################################################################################
-#----- scenarios to reach a target F in a given year ------------------------
+#----- scenarios with a catch ban ------------------------
 
+# Catch ban followed by TAC
+S5a <- list( name = "S5a" ,
+               target = list(Ctarget = ifelse(range(stk)["maxyear"] %in% 2017:2022, 0, CTAC)),
+                HCR =  HCR.cstC,
+                spatial.closure = F ,
+                additionnal.F.reduction = NA
+              ) 
 
-# Linear reduction of F towards FMSY by 2020
-Fmsy2020 <- list( name = "Fmsy2020" ,
-                  target = list(Yr.targ = 2020 , Ftarget = Fmsy) ,
-                  HCR =  HCR.time.target.F,
-                  spatial.closure = F ,
-                  additionnal.F.reduction = NA
-)    
-
-Fmsy2021 <- list( name = "Fmsy2021" ,
-                  target = list(Yr.targ = 2021 , Ftarget = Fmsy) ,
-                  HCR =  HCR.time.target.F,
-                  spatial.closure = F ,
-                  additionnal.F.reduction = NA
+# Catch ban followed by Fmsy
+S5b <- list( name = "S5b" ,
+             target = list(Ftarget = 0.01) ,
+             HCR =  HCR.cstF ,
+             spatial.closure = F ,
+             additionnal.F.reduction = NA
 )
-
-Fmsy2023 <- list( name = "Fmsy2023" ,
-                  target = list(Yr.targ = 2023 , Ftarget = Fmsy) ,
-                  HCR =  HCR.time.target.F,
-                  spatial.closure = F ,
-                  additionnal.F.reduction = NA
-)
-
-
-# Linear reduction of F towards FMSY by 2020
-Fmsy2025 <- list( name = "Fmsy2025" ,
-                  target = list(Yr.targ = 2025 , Ftarget = Fmsy) ,
-                  HCR =  HCR.time.target.F,
-                  spatial.closure = F ,
-                  additionnal.F.reduction = NA
-)    
-
-
-
 
 ################################################################################
 #----- Constant catch scenarios ------------------------
 
-# scenario Catch at 2014 level
-C2014 <- list( name = "C2014" ,
-               target = list(Ctarget = c(catch(stk)[,ac(2014)])) ,
+# scenario Catch at TAC + 50%IUU
+CTACIUU50 <- list( name = "CTACIUU50" ,
+               target = list(Ctarget = CTAC50) ,
                HCR =  HCR.cstC ,
                spatial.closure = F ,
                additionnal.F.reduction = NA
 )    
 
-# scenario Catch at historic lowest level
-Chistmin <- list( name = "Chistmin" ,
-                  target = list(Ctarget = c(min(catch(stk)))) ,
+# scenario Catch at TAC
+CTACNOIUU <- list( name = "CTACNOIUU" ,
+                  target = list(Ctarget = CTAC) ,
                   HCR =  HCR.cstC ,
                   spatial.closure = F ,
                   additionnal.F.reduction = NA
 )    
 
-
 ################################################################################
-#----- scenarios X% annual decrease in the catches untill Bpa is reached ------------------------
-
-## scenario Catch at 2014 level
-C5red <- list( name = "C5red" ,
-               target = list(prec.red = 0.05, Btarget = bpa) ,
-               HCR =  HCR.Cred ,
-               spatial.closure = F ,
-               additionnal.F.reduction = NA
-)    
-
-C10red <- list( name = "C10red" ,
-                target = list(prec.red = 0.10, Btarget = bpa) ,
-                HCR =  HCR.Cred ,
-                spatial.closure = F ,
-                additionnal.F.reduction = NA
-)    
-
-C20red <- list( name = "C20red" ,
-                target = list(prec.red = 0.20, Btarget = bpa) ,
-                HCR =  HCR.Cred ,
-                spatial.closure = F ,
-                additionnal.F.reduction = NA
-)     
-
-C50red <- list( name = "C50red" ,
-                target = list(prec.red = 0.50, Btarget = bpa) ,
-                HCR =  HCR.Cred ,
-                spatial.closure = F ,
-                additionnal.F.reduction = NA
-)                
-
-
-
-################################################################################
-#----- 	GFCM recommendation (2013)  ------------------------
-
-# scenario based on the GFCM proposed haverst control rule
-
-GFCM.HCR <- list( name = "GFCM.HCR" ,
-                  target = list(Fmax = Fmsy , Btrig = mean(c(bpa,blim))) ,
-                  HCR =  HCR.gfcm ,
-                  spatial.closure = F ,
-                  additionnal.F.reduction = NA
-)    
-
-
-GFCM.HCR.modif <- list( name = "GFCM.HCR.modif" ,
-                        target = list(Fmax = Fmsy , Btrig = mean(c(bpa,blim))) ,
-                        HCR =  HCR.gfcm.modified ,
-                        spatial.closure = F ,
-                        additionnal.F.reduction = NA
-)  
-
-
-
-################################################################################
-#----- 	Bpa objective for 2018 and Fmsy for 2020  ------------------------
-
+#----- 	Bpa objective for 2020 and Fmsy for 2020  ------------------------
 
 Bpa.Fmsy2020 <- list( name= "Bpa.Fmsy2020",
                       target =  list(Yr.targ = 2020 , Ftarget = Fmsy , Btarget = bpa),
@@ -477,17 +282,10 @@ Bpa.Fmsy2020 <- list( name= "Bpa.Fmsy2020",
                       additionnal.F.reduction = NA
 ) 
 
-
 ########################################
 # combine them in a list
 
-management.scenarios <- list( F.sq,F.msy,F.low,
-                              F.sqEMERGENCY4 , F.sqEMERGENCY8 ,
-                              Fmsy2020,Fmsy2025, Fmsy2021,Fmsy2023,
-                              C2014 , Chistmin,
-                              F40,F42,F44,F46,F48,F50,F52,F54,F56,F58,F60,F62,
-                              C5red, C10red,C20red, C50red,
-                              GFCM.HCR, GFCM.HCR.modif,
-                              Bpa.Fmsy2020)
+management.scenarios <- list(F.sq, F.msy, CTACNOIUU, CTACIUU50,     
+                              Bpa.Fmsy2020, S5a, S5b)
 
 names(management.scenarios) <- lapply (management.scenarios , function(x) x[[1]])

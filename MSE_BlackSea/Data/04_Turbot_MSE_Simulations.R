@@ -8,7 +8,7 @@ cat("running",run,"MSE\n")
 # sc <- "Chistmin"
 # sc <- "C50red"
 # sc <- "GFCM.HCR" 
-# sc <- "Bpa.Fmsy2020"
+sc <- "Bpa.Fmsy2020"
 
 
 # define the management options for this scenario
@@ -23,8 +23,6 @@ if (!is.null(sp.closure) && sp.closure)
   sel.change <- c(0.9,0.95,1.1,1.1,1.1)
   harvest(pstk)[,vy]       <-  sweep (harvest(pstk)[,vy] , c(1,3:6) , sel.change , "*" )
 }
-
-
 
 #########################################################
 # go fish!
@@ -51,14 +49,17 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   catch.n(stk0) <- catch.n(stk0) * catch.dev[,vy0] # avoid zeros
   
   #- Correct for the cases where you have a zero-catch
-  catch.n(stk0)@.Data[catch.n(stk0)<100] <- -1
+  catch.n(stk0)@.Data[catch.n(stk0)<0.01] <- -1
   
   # CREATE PERCEIVED TUNNING INDICES
   idx0 <- window(idx , end = iay-1)
+  idx0[[2]] <- window(idx0[[2]],end=2007)
+  idx0[[5]] <- window(idx0[[5]],end=2006)
+  
   # COMPUTE SURVEY INDICES BASED ON THE ESTIMTAED CATCHABILITY AND ADD UNCERTAINTY
   # NOTE THAT HISTORICAL PART OF THE TIME SERIES ARE NOT MODIFIED
   
-  
+  idx0[[3]] <- window(idx0[[3]],end=2006)  
   if (iay > iy) # don't do that for the first year because it correspond to the actual year the current assessment was carried out
   {
     for (idx.nb in 1:length(idx))

@@ -28,13 +28,12 @@
 #==============================================================================
 # libraries 
 #==============================================================================
+###This needs to be run only for the batch mode, not if you run one scenario at the time in R
 args=(commandArgs(TRUE))
 print(args)
 argsOrig <- args
 scenario <- strsplit(args,"=")[[1]][2]
-
-scenario <- "Bpa.Fmsy2020"
-#scenario <- "GFCM.HCR.modif"
+###########
 
 #rm(list=ls())
 library(FLash)
@@ -68,7 +67,10 @@ source('./MSE_functions.R')
 species <- "Turbot"  
 assess.name <- "Black Sea turbot TMB"
 
-### to create new starting conditions
+#Trial with one scenario
+scenario <- "Bpa.Fmsy2020"
+
+### to create new starting conditions; first time you need to create the empty worspace and run it as F but run the setting in the loop. If you increase the number of iterations, then run it as T
 update.objects <- F
 
 if (update.objects)
@@ -77,7 +79,7 @@ if (update.objects)
   number.years.simulated  <- 20
   number.replicates.stock <- 250
   ##for short#
-  number.years.simulated  <- 12
+  number.years.simulated  <- 5
   number.replicates.stock <- 2
   ##
   
@@ -93,6 +95,7 @@ if (update.objects)
 # to make sure they use the same conditionning.
 
 # choose for full or short MSE
+#run <- "full"
 run <- "short"
 
 if(run == "full")  fname <-  paste0("./Results/",species,"/",assess.name,"_250iters_20yrs_blank_objects_MSE.RData")
@@ -108,9 +111,9 @@ source('./03_Turbot_MSE_BRPs_and_Scenarios.r')
 save.image(file=sname)
 # Save the environment at the start of the simulations
 
-# run the simulation
-#scenario <- c("F.low")
+# run the simulation (only if running the batch file)
 scenario <- strsplit(argsOrig,"=")[[1]][2]
 strt <- proc.time()
+
 for (sc in scenario)  source('./04_Turbot_MSE_Simulations.r')       # run the simulation for each management scenario
 proc.time() - strt
