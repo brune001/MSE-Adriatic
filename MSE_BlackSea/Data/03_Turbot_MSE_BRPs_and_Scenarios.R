@@ -95,7 +95,7 @@ HCR.Cred <- function(stoc, target)
 {     
   red <- target$prec.red
   btarg<-target$Btarget
-  cref <- catch(stoc)[,ac(2014)]
+  cref <- catch(stoc)[,ac(2016)]
   yref    <- ay
   yad   <- range(stoc)["maxyear"]+2
   ny<-yad-yref
@@ -173,7 +173,7 @@ HCR.gfcm.modified <- function(stoc, target)
 } 
 
 
-# to first go  to Bpa  in a givne target year and then apply the HCR GFCM
+# to first go  to Bpa  in a given target year and then apply the HCR GFCM
 HCR.Bpa.Fmsy<- function(stoc, target)
 {
   # define time and F 
@@ -216,30 +216,28 @@ HCR.Bpa.Fmsy<- function(stoc, target)
 # basis Ftarget = Fsq used to give advice starting in 2018
 # Fsq = F2014-2016
 F.sq <- list( name = "F.sq" ,
-              target = list(Ftarget = mean(c(fbar(stk)[,ac((dy-2):dy)]))) ,
-              HCR =  HCR.cstF ,
-              spatial.closure = F ,
+              target = list(Ftarget = mean(c(fbar(stk)[,ac((dy-2):dy)]))),
+              HCR =  HCR.cstF,
+              spatial.closure = F,
               additionnal.F.reduction = NA
 )    
-
 
 # scenario Fmsy :
 # basis Ftarget = Fmsy used to give advice starting in 2018
 
 F.msy <- list( name = "F.msy" ,
-               target = list(Ftarget = Fmsy) ,
-               HCR =  HCR.cstF ,
-               spatial.closure = F ,
+               target = list(Ftarget = Fmsy),
+               HCR =  HCR.cstF,
+               spatial.closure = F,
                additionnal.F.reduction = NA
 )    
-
 
 ################################################################################
 #----- scenarios with a catch ban ------------------------
 
 # Catch ban followed by TAC
 S5a <- list( name = "S5a" ,
-               target = list(Ctarget = ifelse(range(stk)["maxyear"] %in% 2017:2022, 0, CTAC)),
+               target = list(Ctarget = ifelse(range(stk)["maxyear"] %in% 2018:2022, 0, CTAC)),
                 HCR =  HCR.cstC,
                 spatial.closure = F ,
                 additionnal.F.reduction = NA
@@ -288,4 +286,4 @@ Bpa.Fmsy2020 <- list( name= "Bpa.Fmsy2020",
 management.scenarios <- list(F.sq, F.msy, CTACNOIUU, CTACIUU50,     
                               Bpa.Fmsy2020, S5a, S5b)
 
-names(management.scenarios) <- lapply (management.scenarios , function(x) x[[1]])
+names(management.scenarios) <- lapply (management.scenarios, function(x) x[[1]])

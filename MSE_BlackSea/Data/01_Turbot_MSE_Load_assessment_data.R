@@ -39,13 +39,6 @@ if (species == "Turbot")
   ids                           <- ids
   sam.ctrl                      <- NSH.new.ctrl   }
 
-if (species == "SARDINE")
-{
-  stk                           <- SARDINE2
-  sam                           <- SARDINE2.sam
-  ids                           <- SARDINE2.tun
-  sam.ctrl                      <- SARDINE2.ctrl   }
-
 # need to reformat the control object to macht with the new version of FLSAM 
 #       sam.ctrl.new <- FLSAM.control(stk,ids)
 #       for (slt in slotNames(sam.ctrl.new))  try( slot(sam.ctrl.new,slt) <- slot(sam.ctrl,slt))

@@ -23,22 +23,20 @@ library(msy)
 species <- "Turbot"  
 assess.name <- "Black Sea turbot TMB"
 
-# path to local github repository
+# path 
 setwd("D:/Max files for backup/Documents/Commitees/GFCM/Turbot MSE/MSE SAM/")
 
 # source needed functions
 run <- "short"
 
 if(run == "full")  fname <-  paste0("./Results/",species,"/",assess.name,"_250iters_20yrs_blank_objects_MSE.RData")
-if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iters_12yrs_blank_objects_MSE.RData")
+if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iters_5yrs_blank_objects_MSE.RData")
 
 load(fname)
 
 source('./MSE_functions.R')
 source('./03_Turbot_MSE_BRPs_and_Scenarios.r')
 
-sc <- names(management.scenarios)
-#sc <- "Bpa.Fmsy2020"
 #==============================================================================
 # time periods
 #==============================================================================
@@ -47,6 +45,7 @@ ST <- ac(2017:2021)
 MT <- ac(2022:2027)
 LT <- ac(2028:2035)
 
+sc <- names(management.scenarios)
 
 #==============================================================================
 # extract output for each scenario
@@ -134,7 +133,6 @@ results <- lapply(sc , function(x)
   return(output)
   
 } )
-
 
 diagnostics     <- do.call(rbind.data.frame, lapply(results , function(x) x[[1]]))             
 detailed.output <- do.call(rbind.data.frame, lapply(results , function(x) x[[2]])) 

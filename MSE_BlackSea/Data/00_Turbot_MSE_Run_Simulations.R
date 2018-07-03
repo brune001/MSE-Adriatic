@@ -35,7 +35,7 @@ argsOrig <- args
 scenario <- strsplit(args,"=")[[1]][2]
 ###########
 
-#rm(list=ls())
+rm(list=ls())
 library(FLash)
 #library(FLasher)
 library(FLAssess)
@@ -68,8 +68,9 @@ species <- "Turbot"
 assess.name <- "Black Sea turbot TMB"
 
 #Trial with one scenario
-scenario <- "Bpa.Fmsy2020"
-
+#scenario <- "CTACNOIUU"
+#sc <- "CTACNOIUU"
+ 
 ### to create new starting conditions; first time you need to create the empty worspace and run it as F but run the setting in the loop. If you increase the number of iterations, then run it as T
 update.objects <- F
 
@@ -79,7 +80,7 @@ if (update.objects)
   number.years.simulated  <- 20
   number.replicates.stock <- 250
   ##for short#
-  number.years.simulated  <- 5
+  number.years.simulated  <- 8
   number.replicates.stock <- 2
   ##
   
@@ -99,12 +100,12 @@ if (update.objects)
 run <- "short"
 
 if(run == "full")  fname <-  paste0("./Results/",species,"/",assess.name,"_250iters_20yrs_blank_objects_MSE.RData")
-if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iters_12yrs_blank_objects_MSE.RData")
+if(run == "short") fname <-  paste0("./Results/",species,"/",assess.name,"_2iters_8yrs_blank_objects_MSE.RData")
 
 load(fname)
 
 if(run == "full")  sname <-  paste0("./Results/",species,"/",assess.name,"_",scenario,"_250iters_20yrs_blank_objects_MSE.RData")
-if(run == "short") sname <-  paste0("./Results/",species,"/",assess.name,"_",scenario,"_2iters_12yrs_blank_objects_MSE.RData")
+if(run == "short") sname <-  paste0("./Results/",species,"/",assess.name,"_2iters_8yrs_blank_objects_MSE.RData")
 
 # Define BRPs and Management Scenarios
 source('./03_Turbot_MSE_BRPs_and_Scenarios.r')
@@ -115,5 +116,6 @@ save.image(file=sname)
 scenario <- strsplit(argsOrig,"=")[[1]][2]
 strt <- proc.time()
 
-for (sc in scenario)  source('./04_Turbot_MSE_Simulations.r')       # run the simulation for each management scenario
+for (sc in 1:length(management.scenarios))  source('./04_Turbot_MSE_Simulations.r')       # run the simulation for each management scenario
 proc.time() - strt
+

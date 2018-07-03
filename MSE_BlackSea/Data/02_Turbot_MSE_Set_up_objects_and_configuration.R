@@ -22,9 +22,6 @@
 #
 ###############################################################################
 
-
-
-
 #-------------------------------------------------------------------------------
 # 1 : setting dimensions
 #-------------------------------------------------------------------------------
@@ -41,41 +38,38 @@ py <- y0:dy                         # past years
 vy <- ac(iy:fy)                     # future years
 nsqy <- 3                           # number of SQ years upon which to average results
 
-mny <- 2020                         #2016 # min year to get to trg
-mxy <- 2020                         # 2016 # max year to get to trg
+#mny <- 2020                         #2016 # min year to get to trg
+#mxy <- 2020                         # 2016 # max year to get to trg
 #
 #-------------------------------------------------------------------------------
 # 2 : Create stock object & use vcov for new realisations
 #-------------------------------------------------------------------------------
 
-sstk                            <- monteCarloStockTMB ( stk , ids , sam , it)
-
-
+sstk                            <- monteCarloStockTMB (stk , ids , sam , it)
 
 #--------------------------------------------------------------------------------------------
 # 4 :  S/R
 #--------------------------------------------------------------------------------------------
 
 ############################################################################
-#      4A. hockey stick with break point at meanSSB over the entire time series:
+#      4A. hockey stick with break point at Blim:
 ############################################################################
 # fit hockey stick
 # THIS PART AS BEEN MODIFIED SO THAT A MODEL IS FITTED FOR EACH ITERATION
-# THERE ARE NOW AS MANY PARAMETERS AS ITERATIONS
-sr <- fmle(as.FLSR(sstk, model="segreg"), fixed=list(b=mean(ssb(stk),na.rm=T)))
+# THERE ARE NOW AS MANY PARAMETERS AS ITERATIONS, with an HS at Blim
+blim  <- 3535
+sr <- fmle(as.FLSR(sstk, model="segreg"), fixed=list(b=blim),na.rm=T)
 # this fits the model for each iteration, 
 # but I don't know how to use the mean(ssb) specific to each iteration
 # using yearMeans(ssb(sstk) does not work               
 # so this line is just to create a FLPar object of the right dimension
 # now do the actual parameter estimation per iteration
-for (its in 1:it)  iter(params(sr),its) <- params(fmle(as.FLSR(iter(sstk,its), model="segreg"), fixed=list(b=mean(iter(ssb(sstk),its),na.rm=T))))
-
+for (its in 1:it)  iter(params(sr),its) <- params(fmle(as.FLSR(iter(sstk,its), model="segreg"), fixed=list(b=mean(iter(blim),its)),na.rm=T))
 
 # calculate residuals of the fit and look
 #plot(sr)
 sr.res <- residuals(sr)
 #plot(sr.res)
-
 
 # THIS IS MODIFIED SO THAT AN ARIMA MODEL IS FITTED FOR THE RESIDUALS OF EACH ITERATION
 # AND USE TO PRODUCE THE FUTURE DEVIATIONS FOR THE CORRESPONDING ITERATION
@@ -107,14 +101,11 @@ dev.off()
 
 # PLOTS
 # Confidence interval plot
-ssb <- apply(matrix(as.vector(stk@stock.n*stk@mat*stk@stock.wt), nrow=1+stk@range[[2]] ), 2, sum)       ### this does seem a little strange? why computing SSB this way (and not taking spawning time into account
+#ssb <- apply(matrix(as.vector(stk@stock.n*stk@mat*stk@stock.wt), nrow=1+stk@range[[2]] ), 2, sum)       ### this does seem a little strange? why computing SSB this way (and not taking spawning time into account
 ssb <- c(ssb(stk)@.Data)
 
 segreg.meanssb  <- function(ab, ssb) log(ifelse(ssb >= mean(ssb), ab$a*mean(ssb), ab$a*ssb))
 fit.meanssb <- eqsr_fit(stk,nsamp=2000, models = c("segreg.meanssb"))
-
-
-
 
 plot.rec.res <- F
 
@@ -129,7 +120,6 @@ if (plot.rec.res == T)
   fitted <- as.data.frame(fitted(sr)); names(fitted)[7] <- "fitted"
   Ssb    <- as.data.frame(ssb(sr))   ; names(Ssb)[7]    <- "ssb"
   Obs    <- as.data.frame(rec(sr))   ; names(Obs)[7]    <- "obs"
-  
   
   
   df.sr.bktp.meanssb <- cbind(fitted[,-1] , data.frame(ssb = Ssb[,7] ,obs = Obs[,7]))
@@ -176,12 +166,6 @@ if (plot.rec.res == T)
   
 }
 
-
-
-
-
-
-
 #######################################################################################################################################
 
 # Fixed objects
@@ -193,8 +177,6 @@ TAC <- SSBad <- Fad <- FLQuant(NA, dimnames=list(TAC="all", year=vy, iter=1:it))
 # established at the 2014 level
 TAC[,(ac(iy))] <- catch(sstk)[,"2014"] #  WHAT IS A REALISTIC VALUE , needs to go somewhere else
 
-
-
 # 
 
 # short term forecast: start with a projection of F into the future to ny (16 yrs)
@@ -205,8 +187,6 @@ landings.n(pstk) <- propagate(landings.n(pstk), it)           # NOT NEEDED alrea
 discards.n(pstk) <- propagate(discards.n(pstk), it)
 
 #### NOTE THAT BY DOING THIS ONLY, WE HAVE NOT VARIABILITY IN THE BIOLOGY OR FISHERIES SELECTION PATTERN IN THE FUTURE !!!!!
-
-
 
 # Prepare index object for future surveys USING THE FORMALISE OF SAM :
 # for each iteration, the corresponding catchbilities and observation SD are used
@@ -233,8 +213,6 @@ if(  max(Q)>(min(Q)+(length(Q)-1)))  stop("sorry, for this script to work, value
 O<-unique(c(sam.ctrl@obs.vars ))
 O<-O[O>=0]
 if( max(O)>(min(O)+(length(O)-1)))  stop("sorry, for this script to work, values in sam.ctrl@obs.vars must start from 0, increment by 1 and end at the number of parameters minus 1")
-
-
 
 # multiplying the number of iterations in the indices and expanding the time frame
 for (i in 1:length(ids)) name(ids[[i]]) <- names(ids)[i]

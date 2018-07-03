@@ -8,8 +8,6 @@ cat("running",run,"MSE\n")
 # sc <- "Chistmin"
 # sc <- "C50red"
 # sc <- "GFCM.HCR" 
-sc <- "Bpa.Fmsy2020"
-
 
 # define the management options for this scenario
 mgt.target <- management.scenarios[[sc]][["target"]]
@@ -49,7 +47,7 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   catch.n(stk0) <- catch.n(stk0) * catch.dev[,vy0] # avoid zeros
   
   #- Correct for the cases where you have a zero-catch
-  catch.n(stk0)@.Data[catch.n(stk0)<0.01] <- -1
+  catch.n(stk0)@.Data[catch.n(stk0) < 1] <- -1
   
   # CREATE PERCEIVED TUNNING INDICES
   idx0 <- window(idx , end = iay-1)
@@ -227,6 +225,6 @@ for(i in vy[-length(vy)]){   #a[-(15:16)]
   
   # save at each time step
   restosave <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC,trouble)
-  save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,"V2.RData"))
+  save(restosave,file = paste0("./Results/",species,"/simres/",management.scenarios[[sc]]$name,"_",it,"its_",fy,".RData"))
   
 }  # end of year loops
