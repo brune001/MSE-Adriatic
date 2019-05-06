@@ -1,7 +1,7 @@
 #check which runs finished
-setwd("D:/Repository/MSE_Adriatic/Results/ANCHOVY/simres/")
+setwd("~/MSE-Adriatic/Results/SARDINE/simres/")
 
-fls <- dir()[grep(".RData",dir())]
+fls <- dir()[grep("V2.RData",dir())]
 scens <- unlist(lapply(as.list(fls),function(x){return(strsplit(x,".RData")[[1]][1])}))
 finalYear <- matrix(NA,nrow=length(fls),ncol=1,dimnames=list(scenario=scens,finalYear="finalYear"))
 for(iFile in fls){

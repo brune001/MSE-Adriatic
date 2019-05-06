@@ -226,8 +226,7 @@ for (its in 1:it)  params(srSTF)["a",its] <- iter(mean_rec,its)
 
 
 # save at each time step
-restosave <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC,trouble)
-save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,"V2.RData"))
+restosave <- list(pstk = pstk,Fad=Fad,SSBad=SSBad,TAC=TAC,trouble=trouble,stk0=stk0)
+save(restosave,file = paste0("./Results/",species,"/simres/",sc,"_",it,"its_",fy,"test.RData"))
 
 }  # end of year loops
-

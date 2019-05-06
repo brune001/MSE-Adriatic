@@ -44,7 +44,7 @@ source('./Code/by_modulesTMB/03_ADRIAMED_MSE_BRPs_and_Scenarios.r')
 
 
 
-sc <- names(management.scenarios)
+sc <- names(management.scenarios)[c(1:11,24:30)]
 
 
 
@@ -65,7 +65,7 @@ results <- lapply(sc , function(x)
             {
             cat(x,"\n")
             # load data  and rename / reshapre  and compute what's needed
-            load(file = paste0("./Results/",species,"/simres/",x,"_",it,"its_",fy,".RData"))
+            load(file = paste0("./Results/",species,"/simres/",x,"_",it,"its_",fy,"V2.RData"))
             res<-restosave
             pstk <- window(res$pstk,end = range(res$pstk)["maxyear"] - 1)
             Fad <- window(res$Fad,end = range(res$pstk)["maxyear"] - 1)
@@ -81,18 +81,18 @@ results <- lapply(sc , function(x)
 
             # plot the output
                 # stock trends
-            png(paste0("Results/",species,"/PLOTS/",x,run,"_OM trends.png"), width=6, height=10,units = "in" , res = 300)
-            plot.iStk(pstk ,nits = 2 , title = paste("scenario",x))    
-            dev.off()   
+            png(paste0("Results/",species,"/PLOTS/",x,run,"_OM trends_V2.png"), width=6, height=10,units = "in" , res = 300)
+            plot.iStk(pstk ,nits = 2 , title = paste("scenario",x))
+            dev.off()
                 # assessment errors
-            png(paste0("Results/",species,"/PLOTS/",x,run,"_SSB error.png"), width=6, height=4,units = "in" , res = 300)
-            plot.iQuant(devSSB ,nits = 2 , title = "% error SSB Advice Year")    
-            dev.off()     
-            
-            png(paste0("Results/",species,"/PLOTS/",x,run,"_Fbar error.png"), width=6, height=4,units = "in" , res = 300)
-            plot.iQuant(devF ,nits = 2 , title = "% error F Advice Year")    
-            dev.off()    
-            
+            png(paste0("Results/",species,"/PLOTS/",x,run,"_SSB error_V2.png"), width=6, height=4,units = "in" , res = 300)
+            plot.iQuant(devSSB ,nits = 2 , title = "% error SSB Advice Year")
+            dev.off()
+
+            png(paste0("Results/",species,"/PLOTS/",x,run,"_Fbar error_V2.png"), width=6, height=4,units = "in" , res = 300)
+            plot.iQuant(devF ,nits = 2 , title = "% error F Advice Year")
+            dev.off()
+
                 # risk
 
              time <- data.frame(time = c("Short Term","Medium Term","Long Term") , x = c(mean(an(ST)),mean(an(MT)),mean(an(LT))),y=0.9)
@@ -103,10 +103,10 @@ results <- lapply(sc , function(x)
              P<- P + geom_rect(data = as.data.frame(iter(rsk,1)),aes(xmin = min(an(LT)) ,xmax = max(an(LT)) , ymin =0 , ymax = 1 ) , fill = "red" , alpha = 0.02) 
              P<- P + xlim(ay,fy)+ ylim(0,1) +ylab("p(SSB<Blim)") + ggtitle("probability of falling below Blim")
              P<- P + geom_text(data=time , aes(x=x , y=y , label = time)) 
-             png(paste0("Results/",species,"/PLOTS/",x,run,"_RiskBlim.png"), width=6, height=4,units = "in" , res = 300)
-             print(P) 
-             dev.off() 
-             
+             png(paste0("Results/",species,"/PLOTS/",x,run,"_RiskBlim_V2.png"), width=6, height=4,units = "in" , res = 300)
+             print(P)
+             dev.off()
+
              # table of diagnostics
              ssb<- lapply (list(ST,MT,LT) , FUN = function(x) try(c(apply(yearMeans(ssb(pstk)[,x]),c(1:5),median)),silent=T))
              names(ssb) <- c("Short Term","Medium Term","Long Term")
@@ -150,8 +150,8 @@ results <- lapply(sc , function(x)
 diagnostics     <- do.call(rbind.data.frame, lapply(results , function(x) x[[1]]))             
 detailed.output <- do.call(rbind.data.frame, lapply(results , function(x) x[[2]])) 
 
-write.csv(diagnostics,file = paste0("Results/",species,"/diagnostics_",run,"_MSE.csv"), row.names=FALSE)
-write.csv(detailed.output,file = paste0("Results/",species,"/detailed.output_",run,"_MSE.csv"), row.names=FALSE)                        
+write.csv(diagnostics,file = paste0("Results/",species,"/diagnostics_",run,"_MSE_V2.csv"), row.names=FALSE)
+write.csv(detailed.output,file = paste0("Results/",species,"/detailed.output_",run,"_MSE_V2.csv"), row.names=FALSE)
 
 
 

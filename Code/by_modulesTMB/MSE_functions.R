@@ -572,6 +572,29 @@ function (stck, tun, sam, realisations, return.sam = FALSE, ...)
 ############################################################################################################
 
 # stock trends with iterations
+library(extrafont)
+font_import()
+loadfonts(device = "win")
+require(scales)
+
+pdf("D:/Downloads/sardine.pdf")
+Stk <- pstk
+nits <- 2
+title <- "GFCM.HCR"
+p <- plot(Stk)
+Rec  <- data.frame(as.data.frame(iter(rec(Stk), c(1:nits))) , qname = "Rec")
+SSB  <- data.frame(as.data.frame(iter(ssb(Stk), c(1:nits))) , qname = "SSB")
+Catch  <- data.frame(as.data.frame(iter(catch(Stk), c(1:nits))) , qname = "Catch")
+Harvest  <- data.frame(as.data.frame(iter(fbar(Stk), c(1:nits))) , qname = "F")
+
+fds <- do.call (rbind ,list(Rec,SSB,Catch,Harvest))
+fds <- fds[fds$year >2000,]
+
+point <- format_format(big.mark = " ", decimal.mark = ",", scientific = FALSE)
+p<- p + geom_line(data=fds, aes(year, data, colour=iter), size=0.3)  + ggtitle(title) +geom_vline(xintercept = iy-1)+ theme(legend.position="none",text=element_text(family="Roboto",size=10)) + scale_y_continuous(labels = point)
+print(p)
+dev.off()
+
 
 plot.iStk <- function(Stk,nits,title)
 {
@@ -599,7 +622,8 @@ plot.iQuant <- function(quant,nits,title)
 p <- plot(quant)
 fds  <- data.frame(as.data.frame(iter(quant, c(1:nits))) , qname = "quant")
 fds <- fds[fds$year >2000,]
-p<- p + geom_line(data=fds, aes(year, data, colour=iter), size=0.3)  + ggtitle(title) +geom_vline(xintercept = iy-1)+ theme(legend.position="none")
+p<- p + geom_line(data=fds, aes(year, data, colour=iter), size=0.3)  + ggtitle(title) +geom_vline(xintercept = iy-1)+ theme(legend.position="none",text=element_text(family="Roboto"))
+p + scale_x_continuous(labels = comma)
 print(p)
 }
 
