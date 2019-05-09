@@ -294,7 +294,7 @@ idx <- lapply(ids,function(x)
 
 
 
-
+assign(paste0("biol",strsplit(stk@name," ")[[1]][1]),biol)
 biolsave <- biol
 
 
