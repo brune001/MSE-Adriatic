@@ -1,0 +1,441 @@
+---
+title: "Data selection of Black Sea Turbot using the SAM assessment model"
+author: "Niels Hintzen & Thomas Brunel"
+date:   "7th of July 2019"
+output: html_document
+---
+
+```{r, eval=T, results="hide", echo=TRUE, message=FALSE, warning=FALSE}
+library(FLCore)
+library(FLSAM) #note that FLSAM relies on install_github("fishfollower/SAM",ref="components")
+library(FLEDA)
+options(width = 140)
+rm(list=ls())
+setwd("D:/Repository/MSE_Adriatic/BST/")
+source("BST_additionalPlottingRoutines.r")
+```
+
+# Intro
+In this document we describe the analyses of the Black Sea Turbot assessment data
+and describe how we work towards an ultimate model selection. We start with reading
+in the relevant data.
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+BST                 <- readFLStock("TURT_50_IUU5_2018IND.DAT",no.discards=TRUE)
+BST@catch           <- BST@landings
+units(BST)[1:17]    <- as.list(c(rep(c("tonnes","thousands","kg"),4),
+                                 rep("NA",2),"f",rep("NA",2)))
+BST@discards.n[]    <- 0; BST@discards.wt[] <- 0; BST@discards <- computeDiscards(BST)
+BST@name            <- "Black Sea Turbot"
+
+range(BST)[c("minfbar","maxfbar")]    <- c(4,8)
+BST                                   <- setPlusGroup(BST,BST@range["max"])
+
+BST.tun             <- readFLIndices("TURT_50_IUU5_2018_allTUN.DAT")
+
+summary(BST)
+summary(BST.tun)
+
+#- Two surveys were split up, we combine them here again
+BST.tun[["BG Spring Trawl survey - Abun"]]                              <- window(BST.tun[["BG Spring Trawl survey - Abun"]],end=2018)
+BST.tun[["BG Spring Trawl survey - Abun"]]@index[ac(1:8),ac(2016:2018)] <- BST.tun[["BG Spring Trawl survey2 - Abun"]]@index[,ac(2016:2018)]
+BST.tun[["BG Autumn Trawl survey - Abun"]]                              <- window(BST.tun[["BG Autumn Trawl survey - Abun"]],end=2018)
+BST.tun[["BG Autumn Trawl survey - Abun"]]@index[,ac(2014:2018)]        <- BST.tun[["BG Autumn Trawl survey2 - Abun"]]@index[,ac(2014:2018)]
+BST.tun             <- BST.tun[c(1:7,9)]
+```
+
+Now that we have the data ready, we have a look at some of the catch and survey data.
+First we have a look at the most important catch data.
+
+```{r, eval=T, echo=FALSE, message=FALSE, warning=FALSE}
+print(stacked.area.plot(data~year| unit, as.data.frame(pay(BST@catch.n)),groups="age",main="Proportion of catch numbers at age",ylim=c(-0.01,1.01),xlab="years",col=gray(9:0/9)))
+```
+
+This shows that somewhere end 1980s a substantial change in the fishery occurred, followed by a much larger portion of young fish to be caught.
+Near the end of the time-series, the catch composition becomes more similar to the early period. All in all, the proportion of old fish
+is rather large throughout the entire time-series. This is important to note as often the plusgroup simply contains too few fish to estimate
+a selection for. This seems not to be the case here.
+
+Next up is the survey data. We first look at the internal consistency in these datasets
+```{r, eval=T, echo=FALSE, message=FALSE, warning=FALSE}
+plot(BST.tun[[1]],type="internal",main=names(BST.tun)[1])
+plot(BST.tun[[2]],type="internal",main=names(BST.tun)[2])
+plot(BST.tun[[3]],main=names(BST.tun)[3])
+plot(BST.tun[[4]],type="internal",main=names(BST.tun)[4])
+plot(BST.tun[[5]],type="internal",main=names(BST.tun)[5])
+plot(BST.tun[[6]],type="internal",main=names(BST.tun)[6])
+plot(BST.tun[[7]],main=names(BST.tun)[7])
+plot(BST.tun[[8]],type="internal",main=names(BST.tun)[8])
+```
+
+There are surveys that have hardly any cohort tracking ability, such as the Romanian and Turkish surveys. It is likely that these will
+be dropped at some point. The other surveys look more promising, but still internal consistency is low.
+
+We can make a similar plot for the catch data, to see how good cohort tracking is there.
+```{r, eval=T, echo=FALSE, message=FALSE, warning=FALSE}
+catchAsTun <- FLIndices(catchAsTun=FLIndex(index=BST@catch.n))
+plot(catchAsTun[[1]],type="internal",main="Entire time-series")
+catchAsTun <- FLIndices(catchAsTun=FLIndex(index=BST@catch.n[,ac(1989:2018)]))
+plot(catchAsTun[[1]],type="internal",main="1989-2018")
+```
+
+This doesn't look too good. Even the catch-at-age data has very low internal consistency at ages 2-4 and 8-10.
+Reasons could be related to ageing error, or different countries (in different regions) adding to the catch-at-age matrix in different ratios over time.
+
+# Data observation based data selection
+
+At the Skype meeting at the 4th of July, JRC and WMR agreed to focus most on the time-series from 1989 onwards. As such, we truncate the time-series
+(we do keep a copy of the entire time-series for comparision later on)
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+BSTtsOrig <- BST
+BST       <- window(BST,start=1989)
+```
+
+All surveys fit within this range, so we don't need to truncate those in time.
+However, some of the surveys span to age 10. It was mentioned in an earlier Skype call that all ages in the surveys are true ages, and therefore we need to
+truncate the age 10 data as in the assessment model, age 10 is a plusgroup
+
+```{r, eval=T, echo=FALSE, message=FALSE, warning=FALSE}
+BST.tun[["RO Trawl Survey"]]                <- trim(BST.tun[["RO Trawl Survey"]],age=1:9)
+BST.tun[["UKR Trawl survey West"]]          <- trim(BST.tun[["UKR Trawl survey West"]],age=1:9)
+BST.tun[["UKR Trawl survey East"]]          <- trim(BST.tun[["UKR Trawl survey East"]],age=1:9)
+BST.tun[["TR Trawl survey (East) autumn"]]  <- trim(BST.tun[["TR Trawl survey (East) autumn"]],age=1:9)
+BST.tun[["TR Trawl survey (East)spring"]]   <- trim(BST.tun[["TR Trawl survey (East)spring"]],age=1:9)
+BST.tun[["TR Trawl survey (west)"]]         <- trim(BST.tun[["TR Trawl survey (west)"]],age=1:9)
+BST.tun[["BG Spring Trawl survey - Abun"]]  <- trim(BST.tun[["BG Spring Trawl survey - Abun"]],age=1:9)
+BST.tun[["BG Autumn Trawl survey - Abun"]]  <- trim(BST.tun[["BG Autumn Trawl survey - Abun"]],age=1:9)
+```
+
+In some of these survey data, there are dummy values of 0.01 and sometimes 0.02. The SAM model really tries to fit these
+so we better get rid of those and replace to NA values instead.
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+for(iTun in 1:length(BST.tun))
+  BST.tun[[iTun]]@index@.Data[which(BST.tun[[iTun]]@index[] <= 0.02)] <- NA
+```
+
+Another problem is the large gaps in the survey time-series. For example the Ukrainian surveys lack data between 1995-2000 and the Turkish data between 2012-2016 and
+the Bulgarian between 2013-2015. For every NA value in the SAM assessment, the assessment model tries to estimate a value. In this case, that will result in a very
+large number of missing values to be estimated, on top of the data that is not of top-notch quality, this is something to consider.
+As such, we drop the gaps and do not estimate values there.
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+BST.tun[["UKR Trawl survey West"]]          <- BST.tun[["UKR Trawl survey West"]][,ac(c(1989:1994,1998,2001:2007))]
+BST.tun[["UKR Trawl survey East"]]          <- BST.tun[["UKR Trawl survey East"]][,ac(c(1989:1994,1998,2001:2006))]
+BST.tun[["TR Trawl survey (East) autumn"]]  <- BST.tun[["TR Trawl survey (East) autumn"]][ac(1:5),ac(c(2010:2011,2017:2018))]
+BST.tun[["TR Trawl survey (East)spring"]]   <- BST.tun[["TR Trawl survey (East)spring"]][ac(1:6),ac(c(2010:2011,2017:2018))]
+BST.tun[["TR Trawl survey (west)"]]         <- BST.tun[["TR Trawl survey (west)"]][ac(1:5),ac(c(2011,2013:2014,2016))]
+BST.tun[["BG Spring Trawl survey - Abun"]]  <- BST.tun[["BG Spring Trawl survey - Abun"]][,ac(c(2006:2012,2016:2018))]
+BST.tun[["BG Autumn Trawl survey - Abun"]]  <- BST.tun[["BG Autumn Trawl survey - Abun"]][,ac(c(2006:2012,2014:2018))]
+BST.tun   <- lapply(BST.tun,function(x) {x@type <- "number"; return(x)})
+```
+
+# Model based data selection
+
+Now that the most obvious problems are out of the way, we continue our data selection based on model performance.
+We start off with a default configuration for a SAM assessment in which catchabilities are estimated. We then try to minimize the number
+of catchability parameters so that we can free up some other parameters.
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+BST.ctrl            <- FLSAM.control(BST,BST.tun)
+BST.ctrl@residuals  <- FALSE
+BST.ctrl            <- update(BST.ctrl)
+output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl)))
+```
+
+Note that we can also output a typical SAM object, for e.g. reviewers that have mor affinity with that type of data
+
+```{r, eval=F, echo=FALSE, message=FALSE, warning=FALSE}
+BST.fit             <- FLSAM(BST,BST.tun,BST.ctrl,return.fit=T)
+BST.sam             <- SAM2FLR(BST.fit,BST.ctrl)
+
+#- or via
+data  <- FLSAM2SAM(FLStocks(residual=BST),BST.tun)
+conf  <- ctrl2conf(BST.ctrl,data)
+par   <- stockassessment::defpar(data,conf)
+fit   <- sam.fit(data,conf,par)
+```
+
+This gives us the following catchabilities for each of the surveys
+
+```{r, eval=T, echo=FALSE, message=FALSE, warning=FALSE}
+catch <- catchabilities(BST.sam)
+print(xyplot(value+ubnd+lbnd ~ age | fleet,catch,
+             scale=list(alternating=FALSE,y=list(relation="free")),as.table=TRUE,
+             type="b",lwd=c(2,1,1),col=c("black","grey","grey"),pch=19,
+             subset=fleet %in% names(BST.tun),
+             main="Survey catchability parameters_all",ylab="Catchability",xlab="Age"))
+```
+
+Based on the confidence intervals, I come up with some sensible binding (not final yet)
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+BST.ctrl@catchabilities["RO Trawl Survey",ac(1:9)]                <- c(1:3,rep(4,6))
+BST.ctrl@catchabilities["UKR Trawl survey West",ac(1:9)]          <- c(1,1,2,3,4,5,6,7,7)     + 101
+BST.ctrl@catchabilities["UKR Trawl survey East",ac(1:9)]          <- c(1,1,2,3,4,rep(5,4))    + 201
+BST.ctrl@catchabilities["TR Trawl survey (East) autumn",ac(1:5)]  <- c(1,2,3,4,4)             + 301
+BST.ctrl@catchabilities["TR Trawl survey (East)spring",ac(1:6)]   <- c(1,1,2,2,3,3)           + 401
+BST.ctrl@catchabilities["TR Trawl survey (west)",ac(1:5)]         <- c(1,2,3,3,3)             + 501
+BST.ctrl@catchabilities["BG Spring Trawl survey - Abun",ac(1:9)]  <- c(1,2,3,3,4,4,5,5,5)     + 601
+BST.ctrl@catchabilities["BG Autumn Trawl survey - Abun",ac(1:9)]  <- c(1,2,3,4,rep(5,5))      + 701
+```
+
+Now let's open up some parameters in the observation variances
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+BST.ctrl@obs.vars["catch unique",]                                <- c(1:9,9)
+BST.ctrl@obs.vars["RO Trawl Survey",ac(1:9)]                      <- c(1:8,8)   + 101
+BST.ctrl@obs.vars["UKR Trawl survey West",ac(1:9)]                <- c(1:8,8)   + 201
+BST.ctrl@obs.vars["UKR Trawl survey East",ac(1:9)]                <- c(1:8,8)   + 301
+BST.ctrl@obs.vars["TR Trawl survey (East) autumn",ac(1:5)]        <- c(1:4,4)   + 401
+BST.ctrl@obs.vars["TR Trawl survey (East)spring",ac(1:6)]         <- c(1:5,5)   + 501
+BST.ctrl@obs.vars["TR Trawl survey (west)",ac(1:5)]               <- c(1:4,4)   + 601
+BST.ctrl@obs.vars["BG Spring Trawl survey - Abun",ac(1:9)]        <- c(1:8,8)   + 701
+BST.ctrl@obs.vars["BG Autumn Trawl survey - Abun",ac(1:9)]        <- c(1:8,8)   + 801
+
+BST.ctrl <- update(BST.ctrl)
+```
+
+There is now a lot of freedom in these parameters. We now go and run the model again and look at the output.
+We use the previous run as a starting point though, to not make convergence too difficult for ourselves.
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
+```
+
+Note that convergence is an issue here, so only use these estimate as proxies. Let's look at the parameter values of both
+the F random walk variances and the observation variances
+
+```{r, eval=T, echo=FALSE, message=FALSE, warning=FALSE}
+obsvar.plot(BST.sam)
+
+obsvars <- obs.var(BST.sam)
+print(xyplot(value+ubnd+lbnd ~ age | fleet,obsvars,
+             scale=list(alternating=FALSE,y=list(relation="free")),as.table=TRUE,
+             type="b",lwd=c(2,1,1),col=c("black","grey","grey"),pch=19,
+             main="Observation variances",ylab="Observation variance",xlab="Age"))
+```
+
+From the first picture, there are no obvious age-classes that should be omitted as they are simply too noisy. Obvioulsy, those age-classes of surveys in the
+right-hand side are candidates, but not directly.
+
+Clearly, there is something strange going on with the catch and the Turkish trawl survey east in spring (needs some parameters to be bound together).
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+BST.ctrl@obs.vars["catch unique",]                                <- c(1,2,3,3,3,3,3,3,4,4)
+BST.ctrl@obs.vars["RO Trawl Survey",ac(1:9)]                      <- c(1,1,rep(2,5),3,3)  + 101
+BST.ctrl@obs.vars["UKR Trawl survey West",ac(1:9)]                <- c(1,1,2,2,3,4,5,5,5) + 201
+BST.ctrl@obs.vars["UKR Trawl survey East",ac(1:9)]                <- c(1)                 + 301
+BST.ctrl@obs.vars["TR Trawl survey (East) autumn",ac(1:5)]        <- c(1,1,2,3,3)         + 401
+BST.ctrl@obs.vars["TR Trawl survey (East)spring",ac(1:6)]         <- c(1,1,2,2,3,3)       + 501
+BST.ctrl@obs.vars["TR Trawl survey (west)",ac(1:5)]               <- c(1,2,3,4,4)         + 601
+BST.ctrl@obs.vars["BG Spring Trawl survey - Abun",ac(1:9)]        <- c(rep(1,6),2,3,3)    + 701
+BST.ctrl@obs.vars["BG Autumn Trawl survey - Abun",ac(1:9)]        <- c(1,rep(2,8))        + 801
+BST.ctrl    <- update(BST.ctrl)
+```
+
+Let's run again!
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
+```
+
+```{r, eval=T, echo=FALSE, message=FALSE, warning=FALSE}
+obsvars <- obs.var(BST.sam)
+print(xyplot(value+ubnd+lbnd ~ age | fleet,obsvars,
+             scale=list(alternating=FALSE,y=list(relation="free")),as.table=TRUE,
+             type="b",lwd=c(2,1,1),col=c("black","grey","grey"),pch=19,
+             main="Observation variances",ylab="Observation variance",xlab="Age"))
+
+```
+
+Both the Ukrainian trawl survey east and Bulgarian Autumn Trawl survey have observation variances that are for their entire age range
+close to above 1. Seems that there is not much signal in this data (while the internal consistency of these sources was not too bad,
+hence, there clearly is a mismatch with the catch-at-age data!
+
+Let's perform a Leave-one-out analyses to see what the actual influence of any of these surveys is.
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+output <- capture.output(BST.LOO <- looi(BST,BST.tun,BST.ctrl,type="LOO"))
+plot(BST.LOO)
+
+#- Let's calculate the Relative Percent Difference (RPD)
+RPD <- array(NA,dim=c(length(1989:2018),3,length(BST.LOO)-1),dimnames=list(year=1989:2018,indicator=c("SSB","Fbar","Recruitment"),model=names(BST.LOO)[-1]))
+for(iMod in 2:length(BST.LOO)){
+  RPD[,"SSB",iMod-1]          <- (ssb(BST.LOO[[iMod]])$value - ssb(BST.LOO[[1]])$value) / ssb(BST.LOO[[1]])$value * 100
+  RPD[,"Fbar",iMod-1]         <- (fbar(BST.LOO[[iMod]])$value - fbar(BST.LOO[[1]])$value) / fbar(BST.LOO[[1]])$value * 100
+  RPD[,"Recruitment",iMod-1]  <- (rec(BST.LOO[[iMod]])$value - rec(BST.LOO[[1]])$value) / rec(BST.LOO[[1]])$value * 100
+}
+par(mfrow=c(1,2))
+matplot(y=RPD[,"SSB",],x=1989:2018,type="b",xlab="Years",ylab="Relative percentage difference",lty=1,col=1:(length(BST.LOO)-1),pch=1:(length(BST.LOO)-1),main="SSB")
+plot(1,1,col="white",bty="n")
+legend("topright",legend=names(BST.LOO)[-1],col=1:(length(BST.LOO)-1),pch=1:(length(BST.LOO)-1))
+
+par(mfrow=c(1,2))
+matplot(y=RPD[,"Fbar",],x=1989:2018,type="b",xlab="Years",ylab="Relative percentage difference",lty=1,col=1:(length(BST.LOO)-1),pch=1:(length(BST.LOO)-1),main="Fbar")
+plot(1,1,col="white",bty="n")
+legend("topright",legend=names(BST.LOO)[-1],col=1:(length(BST.LOO)-1),pch=1:(length(BST.LOO)-1))
+
+par(mfrow=c(1,2))
+matplot(y=RPD[,"Recruitment",],x=1989:2018,type="b",xlab="Years",ylab="Relative percentage difference",lty=1,col=1:(length(BST.LOO)-1),pch=1:(length(BST.LOO)-1),main="Recruitment")
+plot(1,1,col="white",bty="n")
+legend("topright",legend=names(BST.LOO)[-1],col=1:(length(BST.LOO)-1),pch=1:(length(BST.LOO)-1))
+```
+
+As it appears, dropping any of the surveys will have an impact in the last 3-4 years of the time-series or it has an impact in the earlier period in terms of SSB.
+For Fbar, only the Bulgarian and Ukrainain time-series really seem to matter (note that these surveys had a good internal consistency)
+For Recruitment, all Turkish data seem to make a difference.
+
+In conclusion, for now it's best to maintain all data sources in the assessment.
+
+Finally, we want to check the plus-group. Given that there may be ageing problems at most likely older ages. We lower to age 5+. We need to trim some of the surveys as the same time!
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+pgs       <- c(5:9)
+pg.sams   <- list()
+for(pg in sort(pgs)) {
+  pg.stck   <- setPlusGroup(BST,pg)
+  pg.tun    <- BST.tun
+  for(iTun in names(pg.tun)){
+    if(range(pg.tun[[iTun]])["max"] >= pg)
+      pg.tun[[iTun]] <- trim(pg.tun[[iTun]],age=1:(pg-1))
+  }
+  pg.ctrl <- drop.from.control(BST.ctrl,ages=((pg+1):BST.ctrl@range["max"]))
+  pg.ctrl@catchabilities[-1,pg]                  <- -1
+  pg.ctrl@obs.vars[-1,pg]                        <- -1
+  pg.ctrl@states["catch unique",ac((pg-1):pg)]   <- 101
+  pg.ctrl@obs.vars["catch unique",ac((pg-1):pg)] <- 101
+  pg.ctrl@range[c("max","plusgroup")] <- pg
+  if(pg < 8)
+    pg.ctrl@range[c("max","plusgroup","maxfbar")]<- pg
+  pg.ctrl <- update(pg.ctrl)
+
+  #Perform assessment
+  output <- capture.output(pg.sam <- FLSAM(pg.stck,pg.tun,pg.ctrl))
+
+  #Store results
+  pg.sam@name <- sprintf("%i+",pg)
+  pg.sams[pg.sam@name] <- pg.sam
+}
+pg.sams[["10+"]] <- BST.sam
+pg.sams <- as(pg.sams,"FLSAMs")
+plot(pg.sams)
+
+sel.pat <- merge(f(pg.sams),fbar(pg.sams),
+                 by=c("year","name"),suffixes=c(".f",".fbar"))
+sel.pat$sel <- sel.pat$value.f/sel.pat$value.fbar
+sel.pat$age <- as.numeric(as.character(sel.pat$age))
+print(xyplot(sel ~ age|sprintf("%i's",floor((year)/5)*5)*name,subset(sel.pat,year>2000),
+             groups=year,type="l",as.table=TRUE,
+             scale=list(alternating=FALSE),
+             main="Selectivity of the Fishery by Pentad",xlab="Age",ylab="F/Fbar"))
+```
+
+All indicators for 8+ are close together, so that could be an optimal plus group, but to be sure, we run a retro to see if leaving in the extra few
+ages has some benefit.
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+#- We cannot call the default retro function because it assumes surveys without year gaps
+#BST.retro <- retro(BST,BST.tun,BST.ctrl,5)
+
+BST.retro <- list()
+BST.retro[[ac(2018)]] <- BST.sam
+for(iRetroYr in 2017:2014){
+  rt.stck <- window(BST,end=iRetroYr)
+  rt.tun  <- BST.tun
+  for(iTun in names(rt.tun)){
+    if(range(rt.tun[[iTun]])["maxyear"] >= iRetroYr)
+      rt.tun[[iTun]] <- rt.tun[[iTun]][,-which(dimnames(rt.tun[[iTun]]@index)$year %in% ((iRetroYr+1):range(rt.tun[[iTun]])["maxyear"]))]
+  }
+  rt.ctrl <- BST.ctrl
+  rt.ctrl@range["maxyear"] <- iRetroYr
+  output <- capture.output(rt.sam <- FLSAM(rt.stck,rt.tun,rt.ctrl))
+  BST.retro[[ac(iRetroYr)]] <- rt.sam
+}
+BST.retro10plus <- as(BST.retro,"FLSAMs")
+
+#- Now for the runs with lower plusgroup
+pgs       <- c(8:9)
+for(pg in sort(pgs)) {
+  pg.stck   <- setPlusGroup(BST,pg)
+  pg.tun    <- BST.tun
+  for(iTun in names(pg.tun)){
+    if(range(pg.tun[[iTun]])["max"] >= pg)
+      pg.tun[[iTun]] <- trim(pg.tun[[iTun]],age=1:(pg-1))
+  }
+  pg.ctrl <- drop.from.control(BST.ctrl,ages=((pg+1):BST.ctrl@range["max"]))
+  pg.ctrl@catchabilities[-1,pg]                  <- -1
+  pg.ctrl@obs.vars[-1,pg]                        <- -1
+  pg.ctrl@states["catch unique",ac((pg-1):pg)]   <- 101
+  pg.ctrl@obs.vars["catch unique",ac((pg-1):pg)] <- 101
+  pg.ctrl@range[c("max","plusgroup")] <- pg
+  if(pg < 8)
+    pg.ctrl@range[c("max","plusgroup","maxfbar")]<- pg
+  pg.ctrl <- update(pg.ctrl)
+
+  #Perform assessment
+  output <- capture.output(pg.sam <- FLSAM(pg.stck,pg.tun,pg.ctrl))
+
+  if(pg == 8){
+    BST.retro <- list()
+    BST.retro[[ac(2018)]] <- pg.sam
+    for(iRetroYr in 2017:2014){
+      rt.stck <- window(BST,end=iRetroYr)
+      rt.tun  <- BST.tun
+      for(iTun in names(rt.tun)){
+        if(range(rt.tun[[iTun]])["maxyear"] >= iRetroYr)
+          rt.tun[[iTun]] <- rt.tun[[iTun]][,-which(dimnames(rt.tun[[iTun]]@index)$year %in% ((iRetroYr+1):range(rt.tun[[iTun]])["maxyear"]))]
+      }
+      rt.ctrl <- BST.ctrl
+      rt.ctrl@range["maxyear"] <- iRetroYr
+      output <- capture.output(rt.sam <- FLSAM(rt.stck,rt.tun,rt.ctrl))
+      BST.retro[[ac(iRetroYr)]] <- rt.sam
+    }
+    BST.retro8plus <- as(BST.retro,"FLSAMs")
+  }
+  if(pg == 9){
+    BST.retro <- list()
+    BST.retro[[ac(2018)]] <- pg.sam
+    for(iRetroYr in 2017:2014){
+      rt.stck <- window(BST,end=iRetroYr)
+      rt.tun  <- BST.tun
+      for(iTun in names(rt.tun)){
+        if(range(rt.tun[[iTun]])["maxyear"] >= iRetroYr)
+          rt.tun[[iTun]] <- rt.tun[[iTun]][,-which(dimnames(rt.tun[[iTun]]@index)$year %in% ((iRetroYr+1):range(rt.tun[[iTun]])["maxyear"]))]
+      }
+      rt.ctrl <- BST.ctrl
+      rt.ctrl@range["maxyear"] <- iRetroYr
+      output <- capture.output(rt.sam <- FLSAM(rt.stck,rt.tun,rt.ctrl))
+      BST.retro[[ac(iRetroYr)]] <- rt.sam
+    }
+    BST.retro9plus <- as(BST.retro,"FLSAMs")
+  }
+}
+
+storeMohnsRhos      <- matrix(NA,nrow=3,ncol=3,dimnames=list(plusgroup=paste0(8:10,"+"),type=c("ssb","fbar","rec")))
+storeMohnsRhos[3,1] <- mean(mohns.rho(BST.retro10plus,ref.year=2018,type="ssb",span=4)[1:4,1])
+storeMohnsRhos[2,1] <- mean(mohns.rho(BST.retro9plus,ref.year=2018,type="ssb",span=4)[1:4,1])
+storeMohnsRhos[1,1] <- mean(mohns.rho(BST.retro8plus,ref.year=2018,type="ssb",span=4)[1:4,1])
+
+storeMohnsRhos[3,2] <- mean(mohns.rho(BST.retro10plus,ref.year=2018,type="fbar",span=4)[1:4,1])
+storeMohnsRhos[2,2] <- mean(mohns.rho(BST.retro9plus,ref.year=2018,type="fbar",span=4)[1:4,1])
+storeMohnsRhos[1,2] <- mean(mohns.rho(BST.retro8plus,ref.year=2018,type="fbar",span=4)[1:4,1])
+
+storeMohnsRhos[3,3] <- mean(mohns.rho(BST.retro10plus,ref.year=2018,type="rec",span=4)[1:4,1])
+storeMohnsRhos[2,3] <- mean(mohns.rho(BST.retro9plus,ref.year=2018,type="rec",span=4)[1:4,1])
+storeMohnsRhos[1,3] <- mean(mohns.rho(BST.retro8plus,ref.year=2018,type="rec",span=4)[1:4,1])
+
+print(storeMohnsRhos)
+plot(BST.retro10plus)
+plot(BST.retro9plus)
+plot(BST.retro8plus)
+```
+
+This concludes all data analyes, and we go for a plusgroup of age 9, as it seems that the large reduction in retrospective is worth it. Going down to a
+plusgroup of age 8 seems not be worthwile.
+
+Now we move on to the next chapter which is fine-tuning of the model parameters.
+
+#rmarkdown::render("BST_dataSelection.Rmd")
+
