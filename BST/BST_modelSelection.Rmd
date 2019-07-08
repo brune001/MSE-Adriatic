@@ -315,8 +315,8 @@ This results in the following AIC values: `r AIC(BST.sams)`
 Best to also run retrospectives and leave-on-out for these, just to make sure the model doesn't get any worse from adding the correlation structures.
 
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
-BST.LOO     <- looi(BST,BST.tun,BST.ctrl,type="loo")
-BST.retro   <- manualRetro(BST.sam,BST,BST.tun,BST.ctrl,sam.init=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))
+output <- capture.output(BST.LOO     <- looi(BST,BST.tun,BST.ctrl,type="loo"))
+output <- capture.output(BST.retro   <- manualRetro(BST.sam,BST,BST.tun,BST.ctrl,sam.init=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA)))))
 
 print(mean(mohns.rho(BST.retro[1:4],ref.year=2018,type="ssb",span=3)[1:3,1]))
 print(mean(mohns.rho(BST.retro[1:4],ref.year=2018,type="fbar",span=3)[1:3,1]))
