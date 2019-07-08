@@ -63,6 +63,10 @@ BST.tun[["BG Spring Trawl survey - Abun"]]  <- BST.tun[["BG Spring Trawl survey 
 BST.tun[["BG Autumn Trawl survey - Abun"]]  <- BST.tun[["BG Autumn Trawl survey - Abun"]][ac(1:8),ac(c(2006:2012,2014:2018))]
 BST.tun   <- lapply(BST.tun,function(x) {x@type <- "number"; return(x)})
 
+for(iTun in 1:length(BST.tun))
+  BST.tun[[iTun]]@index@.Data[which(BST.tun[[iTun]]@index[] <= 0.02)] <- NA
+
+
 BST.ctrl  <- FLSAM.control(BST,BST.tun)
 
 BST.ctrl@catchabilities["RO Trawl Survey",ac(1:8)]                <- c(1:3,rep(4,5))
@@ -89,6 +93,19 @@ BST.ctrl <- update(BST.ctrl)
 output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl)))
 ```
 
+There is one feature of SAM that we are not going to use (as it cannot be estimated reliably with the given data) which is the deviation to the survivor equation.
+We set this to a low value (i.e. turn the feature off). For this, we need an 'init'  object that we create first, and then the call to the model will become a little
+bit more complex, but the code below will guide us.
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+init.sam            <- BST.sam
+init.sam@params$value[which(init.sam@params$name=="logSdLogN")[2]] <- -5
+#The new bit in the calling the assessment is the second row bit
+output <- capture.output(BST.sam <- FLSAM(BST,BST.tun,BST.ctrl,
+                                          starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA)))))
+```
+
+
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
 plot(BST.sam)
 print(residual.diagnostics(BST.sam))
@@ -105,7 +122,7 @@ We simply tackle this by giving full freedom to all random walks and cluster tho
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
 BST.ctrl@f.vars[1,] <- c(1:8,8)
 BST.ctrl            <- update(BST.ctrl)
-output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
+output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
 fvars <- f.var(BST.sam)
 print(xyplot(value+ubnd+lbnd ~ age | fleet,fvars,
              scale=list(alternating=FALSE,y=list(relation="free")),as.table=TRUE,
@@ -113,12 +130,12 @@ print(xyplot(value+ubnd+lbnd ~ age | fleet,fvars,
              main="F random walk variances",ylab="Variance",xlab="Age"))
 ```
 
-Concluding from this that we can group ages 1 to 2, 3 to 7 and 8 to 9. This
+Concluding from this that we can group ages 1 to 2, 5 to 6 and 8 to 9.
 
 ```{r, eval=T, echo=FALSE, message=FALSE, warning=FALSE}
-BST.ctrl@f.vars[1,]              <- c(1,1,2,2,2,2,2,3,3)
+BST.ctrl@f.vars[1,]              <- c(1,1,2,3,4,4,5,6,6)
 BST.ctrl            <- update(BST.ctrl)
-output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
+output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
 ```
 
 The AIC drops to `r AIC(BST.sam)`
@@ -132,32 +149,32 @@ There are three options here:
 
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
 BST.ctrl@cor.F      <- as.integer(0)
-output              <- capture.output(BST.sam0             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
-retrocorF0          <- manualRetro(BST.sam0,BST,BST.tun,BST.ctrl)
+output              <- capture.output(BST.sam0             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
+retrocorF0          <- manualRetro(BST.sam0,BST,BST.tun,BST.ctrl,sam.init=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))
 BST.ctrl@cor.F      <- as.integer(1)
-output              <- capture.output(BST.sam1             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
-retrocorF1          <- manualRetro(BST.sam1,BST,BST.tun,BST.ctrl)
+output              <- capture.output(BST.sam1             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
+retrocorF1          <- manualRetro(BST.sam1,BST,BST.tun,BST.ctrl,sam.init=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))
 BST.ctrl@cor.F      <- as.integer(2)
-output              <- capture.output(BST.sam2             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
-retrocorF2          <- manualRetro(BST.sam2,BST,BST.tun,BST.ctrl)
+output              <- capture.output(BST.sam2             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
+retrocorF2          <- manualRetro(BST.sam2,BST,BST.tun,BST.ctrl,sam.init=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))
 
 BST.samsFcor        <- as(list(BST.sam0,BST.sam1,BST.sam2),"FLSAMs")
 
 storeMohnsRhos      <- matrix(NA,nrow=3,ncol=3,dimnames=list(corF=c(0,1,2),type=c("ssb","fbar","rec")))
-storeMohnsRhos[1,1] <- mean(mohns.rho(retrocorF0,ref.year=2018,type="ssb",span=3)[1:3,1])
-storeMohnsRhos[2,1] <- mean(mohns.rho(retrocorF1[1:3],ref.year=2018,type="ssb",span=2)[1:2,1])
-storeMohnsRhos[3,1] <- mean(mohns.rho(retrocorF2,ref.year=2018,type="ssb",span=3)[1:3,1])
+storeMohnsRhos[1,1] <- mean(mohns.rho(retrocorF0,ref.year=2018,type="ssb",span=4)[1:4,1])
+storeMohnsRhos[2,1] <- mean(mohns.rho(retrocorF1,ref.year=2018,type="ssb",span=4)[1:4,1])
+storeMohnsRhos[3,1] <- mean(mohns.rho(retrocorF2,ref.year=2018,type="ssb",span=4)[1:4,1])
 
-storeMohnsRhos[1,2] <- mean(mohns.rho(retrocorF0,ref.year=2018,type="fbar",span=3)[1:3,1])
-storeMohnsRhos[2,2] <- mean(mohns.rho(retrocorF1[1:3],ref.year=2018,type="fbar",span=2)[1:2,1])
-storeMohnsRhos[3,2] <- mean(mohns.rho(retrocorF2,ref.year=2018,type="fbar",span=3)[1:3,1])
+storeMohnsRhos[1,2] <- mean(mohns.rho(retrocorF0,ref.year=2018,type="fbar",span=4)[1:4,1])
+storeMohnsRhos[2,2] <- mean(mohns.rho(retrocorF1,ref.year=2018,type="fbar",span=4)[1:4,1])
+storeMohnsRhos[3,2] <- mean(mohns.rho(retrocorF2,ref.year=2018,type="fbar",span=4)[1:4,1])
 
-storeMohnsRhos[1,3] <- mean(mohns.rho(retrocorF0,ref.year=2018,type="rec",span=3)[1:3,1])
-storeMohnsRhos[2,3] <- mean(mohns.rho(retrocorF1[1:3],ref.year=2018,type="rec",span=2)[1:2,1])
-storeMohnsRhos[3,3] <- mean(mohns.rho(retrocorF2,ref.year=2018,type="rec",span=3)[1:3,1])
+storeMohnsRhos[1,3] <- mean(mohns.rho(retrocorF0,ref.year=2018,type="rec",span=4)[1:4,1])
+storeMohnsRhos[2,3] <- mean(mohns.rho(retrocorF1,ref.year=2018,type="rec",span=4)[1:4,1])
+storeMohnsRhos[3,3] <- mean(mohns.rho(retrocorF2,ref.year=2018,type="rec",span=4)[1:4,1])
 
 plot(retrocorF0,main="Fcor=0")
-plot(retrocorF1[1:3],main="Fcor=1")
+plot(retrocorF1,main="Fcor=1")
 plot(retrocorF2,main="Fcor=2")
 
 print(storeMohnsRhos)
@@ -173,16 +190,16 @@ but it's far less stable in optimization. Perhaps this is the one setting that n
 We've done this analyses before, but we repeat it here just to make sure, also because we changed some things in the data selection procedures
 
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
-BST.ctrl@catchabilities["RO Trawl Survey",ac(1:9)]                <- c(1:8,8)       + 101
-BST.ctrl@catchabilities["UKR Trawl survey West",ac(1:9)]          <- c(1:8,8)       + 201
-BST.ctrl@catchabilities["UKR Trawl survey East",ac(1:9)]          <- c(1:8,8)       + 301
+BST.ctrl@catchabilities["RO Trawl Survey",ac(1:8)]                <- c(1:7,7)       + 101
+BST.ctrl@catchabilities["UKR Trawl survey West",ac(1:8)]          <- c(1:7,7)       + 201
+BST.ctrl@catchabilities["UKR Trawl survey East",ac(1:8)]          <- c(1:7,7)       + 301
 BST.ctrl@catchabilities["TR Trawl survey (East) autumn",ac(1:5)]  <- c(1,2,3,4,4)   + 401
 BST.ctrl@catchabilities["TR Trawl survey (East)spring",ac(1:6)]   <- c(1:5,5)       + 501
 BST.ctrl@catchabilities["TR Trawl survey (west)",ac(1:5)]         <- c(1:4,4)       + 601
-BST.ctrl@catchabilities["BG Spring Trawl survey - Abun",ac(1:9)]  <- c(1:8,8)       + 701
-BST.ctrl@catchabilities["BG Autumn Trawl survey - Abun",ac(1:9)]  <- c(1:8,8)       + 801
+BST.ctrl@catchabilities["BG Spring Trawl survey - Abun",ac(1:8)]  <- c(1:7,7)       + 701
+BST.ctrl@catchabilities["BG Autumn Trawl survey - Abun",ac(1:8)]  <- c(1:7,7)       + 801
 BST.ctrl <- update(BST.ctrl)
-output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
+output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
 
 catch <- catchabilities(BST.sam)
 print(xyplot(value+ubnd+lbnd ~ age | fleet,catch,
@@ -195,16 +212,17 @@ print(xyplot(value+ubnd+lbnd ~ age | fleet,catch,
 There is some binding to do!
 
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
-BST.ctrl@catchabilities["RO Trawl Survey",ac(1:8)]                <- c(1:4,rep(5,3),6)
+BST.ctrl@catchabilities["RO Trawl Survey",ac(1:8)]                <- c(1:4,rep(5,4))
 BST.ctrl@catchabilities["UKR Trawl survey West",ac(1:8)]          <- c(1,1,2,3,4,rep(5,3))    + 101
 BST.ctrl@catchabilities["UKR Trawl survey East",ac(1:8)]          <- c(1,1,2,3,4,rep(5,3))    + 201
 BST.ctrl@catchabilities["TR Trawl survey (East) autumn",ac(1:5)]  <- c(1,2,3,4,4)             + 301
-BST.ctrl@catchabilities["TR Trawl survey (East)spring",ac(1:6)]   <- c(1,1,2,2,3,3)           + 401
+BST.ctrl@catchabilities["TR Trawl survey (East)spring",ac(1:6)]   <- c(1,2,3,3,4,4)           + 401
 BST.ctrl@catchabilities["TR Trawl survey (west)",ac(1:5)]         <- c(1,2,3,3,3)             + 501
-BST.ctrl@catchabilities["BG Spring Trawl survey - Abun",ac(1:8)]  <- c(1,2,3,3,rep(4,4))     + 601
+BST.ctrl@catchabilities["BG Spring Trawl survey - Abun",ac(1:8)]  <- c(1,2,3,3,rep(4,4))      + 601
 BST.ctrl@catchabilities["BG Autumn Trawl survey - Abun",ac(1:8)]  <- c(1,2,3,4,rep(5,4))      + 701
 BST.ctrl                                                          <- update(BST.ctrl)
-output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
+output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
+
 ```
 
 Finally, we get to an AIC of `r AIC(BST.sam)`
@@ -225,7 +243,7 @@ BST.ctrl@obs.vars["BG Spring Trawl survey - Abun",ac(1:8)]        <- c(1:7,7)   
 BST.ctrl@obs.vars["BG Autumn Trawl survey - Abun",ac(1:8)]        <- c(1:7,7)   + 801
 
 BST.ctrl <- update(BST.ctrl)
-output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
+output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
 ```
 
 Also here, some binding to do!
@@ -246,17 +264,17 @@ right-hand side are candidates, but not directly.
 Clearly, there is something strange going on with the catch and the Turkish trawl survey east in spring (needs some parameters to be bound together).
 
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
-BST.ctrl@obs.vars["catch unique",]                                <- c(1,1,2,3,4,5,6,7,7)
-BST.ctrl@obs.vars["RO Trawl Survey",ac(1:8)]                      <- c(1,1,rep(2,4),3,3)  + 101
-BST.ctrl@obs.vars["UKR Trawl survey West",ac(1:8)]                <- c(1,1,2,2,2,2,3,3)   + 201
-BST.ctrl@obs.vars["UKR Trawl survey East",ac(1:8)]                <- c(1,1,2,3,3,3,4,4)   + 301
-BST.ctrl@obs.vars["TR Trawl survey (East) autumn",ac(1:5)]        <- c(1,1,2,3,3)         + 401
-BST.ctrl@obs.vars["TR Trawl survey (East)spring",ac(1:6)]         <- c(1,1,2,2,3,3)       + 501
-BST.ctrl@obs.vars["TR Trawl survey (west)",ac(1:5)]               <- c(1,1,1,2,2)         + 601
-BST.ctrl@obs.vars["BG Spring Trawl survey - Abun",ac(1:8)]        <- c(rep(1,6),2,2)      + 701
-BST.ctrl@obs.vars["BG Autumn Trawl survey - Abun",ac(1:8)]        <- c(1,rep(2,5),3,3)    + 801
+BST.ctrl@obs.vars["catch unique",]                                <- c(1,1,rep(2,5),3,3)
+BST.ctrl@obs.vars["RO Trawl Survey",ac(1:8)]                      <- c(1,1,rep(2,3),rep(3,3))   + 101
+BST.ctrl@obs.vars["UKR Trawl survey West",ac(1:8)]                <- c(1,1,2,2,2,2,3,3)         + 201
+BST.ctrl@obs.vars["UKR Trawl survey East",ac(1:8)]                <- c(1,1,2,3,3,3,4,4)         + 301
+BST.ctrl@obs.vars["TR Trawl survey (East) autumn",ac(1:5)]        <- c(1,1,2,3,3)               + 401
+BST.ctrl@obs.vars["TR Trawl survey (East)spring",ac(1:6)]         <- c(1,1,2,2,3,3)             + 501
+BST.ctrl@obs.vars["TR Trawl survey (west)",ac(1:5)]               <- c(1,1,1,2,2)               + 601
+BST.ctrl@obs.vars["BG Spring Trawl survey - Abun",ac(1:8)]        <- c(rep(1,6),2,2)            + 701
+BST.ctrl@obs.vars["BG Autumn Trawl survey - Abun",ac(1:8)]        <- c(1,rep(2,7))              + 801
 BST.ctrl    <- update(BST.ctrl)
-output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
+output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
 
 ```
 
@@ -287,12 +305,23 @@ for(iTun in order){
   BST.ctrl@cor.obs.Flag[idx] <- as.factor("AR")
   BST.ctrl    <- update(BST.ctrl)
 
-  output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
+  output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))))
   BST.sams[[iTun]] <- BST.sam
 }
-
+BST.sams <- as(BST.sams,"FLSAMs")
 ```
 
+This results in the following AIC values: `r AIC(BST.sams)`
+Best to also run retrospectives and leave-on-out for these, just to make sure the model doesn't get any worse from adding the correlation structures.
+
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+BST.LOO     <- looi(BST,BST.tun,BST.ctrl,type="loo")
+BST.retro   <- manualRetro(BST.sam,BST,BST.tun,BST.ctrl,sam.init=init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))
+
+print(mean(mohns.rho(BST.retro[1:4],ref.year=2018,type="ssb",span=3)[1:3,1]))
+print(mean(mohns.rho(BST.retro[1:4],ref.year=2018,type="fbar",span=3)[1:3,1]))
+print(mean(mohns.rho(BST.retro[1:4],ref.year=2018,type="rec",span=3)[1:3,1]))
+```
 
 
 

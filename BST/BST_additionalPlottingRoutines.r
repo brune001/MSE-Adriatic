@@ -63,7 +63,7 @@ stacked.area.plot <- function(x,data,groups,...) {
         do.call(xyplot,plot.args)
 }
 
-manualRetro <- function(BST.sam,BST,BST.tun,BST.ctrl){
+manualRetro <- function(BST.sam,BST,BST.tun,BST.ctrl,map=NULL,sam.init=NULL){
   BST.retro <- list()
   BST.retro[[ac(2018)]] <- BST.sam
   for(iRetroYr in 2017:2014){
@@ -75,7 +75,11 @@ manualRetro <- function(BST.sam,BST,BST.tun,BST.ctrl){
     }
     rt.ctrl <- BST.ctrl
     rt.ctrl@range["maxyear"] <- iRetroYr
-    output <- capture.output(rt.sam <- try(FLSAM(rt.stck,rt.tun,rt.ctrl)))
+    if(is.null(map)){
+      output <- capture.output(rt.sam <- try(FLSAM(rt.stck,rt.tun,rt.ctrl)))
+    } else {
+      output <- capture.output(rt.sam <- try(FLSAM(rt.stck,rt.tun,rt.ctrl,starting.values=sam.init,map=map)))
+    }
     if(class(rt.sam)=="try-error"){rt.sam <- NA}
     BST.retro[[ac(iRetroYr)]] <- rt.sam
   }
