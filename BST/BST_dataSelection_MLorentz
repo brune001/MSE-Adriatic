@@ -30,6 +30,7 @@ BST.tun               <- idx
 There usually are some additional settings to set right, so we continue with that.
 
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+BST@m[]               <- c(0.343,0.280,0.242,0.217,0.200,0.187,0.177,0.169,0.163,0.158)
 BST@catch             <- BST@landings
 units(BST)[1:17]      <- as.list(c(rep(c("tonnes","thousands","kg"),4),
                                  rep("NA",2),"f",rep("NA",2)))
@@ -124,7 +125,7 @@ BST.tun[["TR_Spring"]]      <- BST.tun[["TR_Spring"]][,ac(c(1991:1996,2010:2011,
 BST.tun[["BG_Spring"]]      <- BST.tun[["BG_Spring"]][,ac(c(2006:2012,2016:2018))]
 BST.tun[["BG_Autumn"]]      <- BST.tun[["BG_Autumn"]][,ac(c(2006:2007,2009:2011,2014:2018))]
 BST.tun                     <- lapply(BST.tun,function(x) {x@type <- "number"; return(x)})
-save(BST,BST.tun,file="./DS1.RData")
+save(BST,BST.tun,file="./DSML1.RData")
 ```
 
 In principle, the most crude data selection is finished now. There are basically two lines one can follow:
@@ -207,7 +208,7 @@ We use the previous run as a starting point though, to not make convergence too 
 
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
 output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
-save(BST,BST.tun,BST.ctrl,BST.sam,file="./DS3.RData")
+save(BST,BST.tun,BST.ctrl,BST.sam,file="./DSML3.RData")
 ```
 
 Note that convergence is an issue here, so only use these estimate as proxies. Let's look at the parameter values of both
@@ -245,7 +246,7 @@ Let's run again!
 
 ```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
 output              <- capture.output(BST.sam             <- (FLSAM(BST,BST.tun,BST.ctrl,starting.values=BST.sam)))
-save(BST,BST.tun,BST.ctrl,BST.sam,file="./DS4.RData")
+save(BST,BST.tun,BST.ctrl,BST.sam,file="./DSML4.RData")
 ```
 
 ```{r, eval=T, echo=FALSE, message=FALSE, warning=FALSE}
@@ -284,14 +285,14 @@ BST.LOI <- as(BST.LOI,"FLSAMs")
 
 plot(BST.LOO)
 plot(BST.LOI)
-save(BST,BST.tun,BST.ctrl,BST.LOO,BST.LOI,file="./DS5.RData")
+save(BST,BST.tun,BST.ctrl,BST.LOO,BST.LOI,file="./DSML5.RData")
 
-```
+```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
+
 
 Now that we've dropped each single survey one at a time, but also kept just one survey at a time, we make some diagnostic plots to see how much
 influence each survey has
 
-```{r, eval=T, echo=TRUE, message=FALSE, warning=FALSE}
 #- Let's calculate the Relative Percent Difference (RPD) for the leave one out runs
 RPD <- array(NA,dim=c(length(1950:2018),3,length(BST.LOO)),dimnames=list(year=1950:2018,indicator=c("SSB","Fbar","Recruitment"),model=names(BST.LOO)))
 for(iMod in 1:length(BST.LOO)){
@@ -390,7 +391,7 @@ print(xyplot(sel ~ age|sprintf("%i's",floor((year)/5)*5)*name,subset(sel.pat,yea
              scale=list(alternating=FALSE),
              main="Selectivity of the Fishery by Pentad",xlab="Age",ylab="F/Fbar"))
 
-save(BST,BST.tun,BST.ctrl,pg.sams,file="./DS6.RData")
+save(BST,BST.tun,BST.ctrl,pg.sams,file="./DSML6.RData")
 ```
 
 10+ group seems to behave markedly different from 6:9+ groups. The selection pattern goes from increasing to dome-shape and inflates biomass.
@@ -464,7 +465,8 @@ for(pg in sort(pgs)) {
       rt.ctrl <- pg.ctrl
       rt.ctrl@residuals <- FALSE
       rt.ctrl@range["maxyear"] <- iRetroYr
-      output <- capture.output(rt.sam <- FLSAM(rt.stck,rt.tun,rt.ctrl,starting.values=pg.init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA)))))
+      #output <- capture.output(
+      rt.sam <- FLSAM(rt.stck,rt.tun,rt.ctrl,starting.values=pg.init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))#)
       BST.retro[[ac(iRetroYr)]] <- rt.sam
     }
     BST.retro8plus <- as(BST.retro,"FLSAMs")
@@ -482,7 +484,8 @@ for(pg in sort(pgs)) {
       rt.ctrl <- pg.ctrl
       rt.ctrl@residuals <- FALSE
       rt.ctrl@range["maxyear"] <- iRetroYr
-      output <- capture.output(rt.sam <- FLSAM(rt.stck,rt.tun,rt.ctrl,starting.values=pg.init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA)))))
+      #output <- capture.output(
+      rt.sam <- FLSAM(rt.stck,rt.tun,rt.ctrl,starting.values=pg.init.sam,map=list(logSdLogN=as.factor(c(-1.5,NA))))#)
       BST.retro[[ac(iRetroYr)]] <- rt.sam
     }
     BST.retro9plus <- as(BST.retro,"FLSAMs")
@@ -506,10 +509,10 @@ print(storeMohnsRhos)
 plot(BST.retro10plus,main="10+")
 plot(BST.retro9plus,main="9+")
 plot(BST.retro8plus,main="8+")
-save(BST,BST.ctrl,BST.tun,BST.retro10plus,BST.retro9plus,BST.retro8plus,file="DS7.RData")
+save(BST,BST.ctrl,BST.tun,BST.retro10plus,BST.retro9plus,BST.retro8plus,file="DSML7.RData")
 ```
 
-This concludes all data analyes, and we go for a plusgroup of age 9, as there seems to be a real issue with the 10+ in 2018.
+This concludes all data analyes, and we go for a plusgroup of age 9, as there seems to be a real issue with the 10+ in 2017 and 2018.
 The cause for this is yet unknown and needs further exploration.
 
 Now we move on to the next chapter which is fine-tuning of the model parameters.
