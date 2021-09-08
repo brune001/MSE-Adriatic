@@ -1,0 +1,44 @@
+
+library(FLCore)
+library(lattice)
+library(scales)
+library(gplots)
+library(ggplot2)
+
+
+load("Baserun_10new_noA2EW17.Rdata")
+
+
+R<-as.data.frame(rec(ANE),drop=T) ; names(R)[2]<-"Rec"
+SSB<-as.data.frame(ssb( ANE),drop = T) ; names(SSB)[2] <- "SSB"
+
+dats <- merge(R,SSB,all=T)
+plot(ANE)
+ggplot(dats, aes((SSB),(Rec))) + geom_line()+geom_point()   + xlim(0,60000)+ ylim(0,1.47e8)
+
+ggplot(dats, aes(year,Rec/SSB)) + geom_line()+geom_point()
+
+
+
+
+SR <- as.FLSR(ANE)
+model(SR) <- "bevholt"
+bh <- fmle(SR)
+model(SR) <- "ricker"
+ri <- fmle(SR)
+model(SR) <- "segreg"
+sg <- fmle(SR)
+
+ print(paste0('Ricker: ',round(AIC(ri),4),' ',
+             'Beverton-Holt: ',round(AIC(bh),4),' ',
+             'SegReg: ',round(AIC(sg),4)))
+a<-6405
+b<- 1.87e-05
+ ssb <- seq(0,60000,by=10)
+ rec <- a * ssb * exp(-b * ssb)
+ 
+ min(rec(ANE))/params(bh)["a"]
+  min(rec(ANE))/ 126003626
+   params(bh)["a"] * 0.2
+
+plot(rec(ANE)[,-1],rec(ANE)[,-20])

@@ -63,6 +63,10 @@ type(biomSurf)  <- "biomass"
 name(biomSurf) <- "Echo East Biomass"
 EchoEastBiomass <- FLIndices("Echo East Biomass" = biomSurf)
 
+# trim the surveys
+Sar.tun[[1]]  <- window(Sar.tun[[1]] , start = 2008)
+Sar.tun[[2]]  <- window(Sar.tun[[2]] , start = 2008)
+
 
 ## Trim indices to have the required ages
 Sar.tun                         <- FLIndices("Echo W17"=Sar.tun[[1]],
@@ -75,7 +79,7 @@ Sar.tun                         <- FLIndices("Echo W17"=Sar.tun[[1]],
 
 #
 ## run data analyses ####
-save(Sar.tun,file="PILtun.RData")
+save(Sar.tun,file="PILtun_trimmed.RData")
 
 
 
@@ -113,7 +117,7 @@ Sar.ctrl2@residuals                                <-  F
 Sar.ctrl2                                          <- update(Sar.ctrl2)
 SAR.sam       <- FLSAM(Sar,Sar.tun,Sar.ctrl2) #model converges, residuals all estimates
 
-runname <- "all surveys conf 1"
+runname <- "all surveys conf 1 trimmed"
 assess<- Sar
 mat(assess)[1,]  <- 0
 assess.sam <-SAR.sam
@@ -145,7 +149,7 @@ Sar.ctrl3                                          <- update(Sar.ctrl3)
                               starting.values=init.sam,
                               map=list(logSdLogN=as.factor(c(-1.5,NA))))
 
-runname <- "all surveys fixed PE0.2"
+runname <- "all surveys fixed PE0.2 trimmed"
 assess<- Sar
 mat(assess)[1,]  <- 0
 assess.sam <-SAR.sam0.2

@@ -9,7 +9,7 @@ library(FLSAM)
 library(FLEDA) 
 library(stockassessment)
 #- Set your working directory paths
-dataPath  <- "./Data/"
+dataPath  <- "./Data/data_v2"
 outPath   <- "./Results/"
 codePath  <- "./"
 #setwd("C:/Users/Vanja/Desktop/PROCJENE 2020/SARDINE 2019/data/run9")
@@ -19,7 +19,7 @@ codePath  <- "./"
 #- Read in the stock data
 #-------------------------------------------------------------------------------
 
-Sar                 <- readFLStock(file.path(dataPath, "Sar17_18new.ndx"),no.discards=TRUE)
+Sar                 <- readFLStock(file.path(dataPath, "Sar17_18new2.ndx"),no.discards=TRUE)
 Sar@catch           <- Sar@landings
 units(Sar)[1:17]    <- as.list(c(rep(c("tonnes","thousands","kg"),4),
                                  rep("NA",2),"f",rep("NA",2)))
@@ -27,11 +27,11 @@ Sar@discards.n[]    <- 0; Sar@discards.wt[] <- 0; Sar@discards <- computeDiscard
 
 
 #Set object details
-Sar@name                              <- "Sardine GSA 17-18"
+Sar@name                              <- "Sardine GSA 17-18 lastest input"
 range(Sar)[c("minfbar","maxfbar")]    <- c(1,3)
 Sar                                   <- setPlusGroup(Sar,Sar@range["max"])
 
-save(Sar,file="PILstk.RData")
+save(Sar,file="PILstk_lastest_data.RData")
 
 mat(Sar)[1,]<-1      # change maturity so that SSB and TSB are the same 
 
@@ -75,7 +75,7 @@ Sar.tun                         <- FLIndices("Echo W17"=Sar.tun[[1]],
 
 #
 ## run data analyses ####
-save(Sar.tun,file="PILtun.RData")
+save(Sar.tun,file="PILtun_lastest_data.RData")
 
 
 
@@ -113,7 +113,7 @@ Sar.ctrl2@residuals                                <-  F
 Sar.ctrl2                                          <- update(Sar.ctrl2)
 SAR.sam       <- FLSAM(Sar,Sar.tun,Sar.ctrl2) #model converges, residuals all estimates
 
-runname <- "all surveys conf 1"
+runname <- "all surveys conf 1 lastest data"
 assess<- Sar
 mat(assess)[1,]  <- 0
 assess.sam <-SAR.sam
@@ -145,7 +145,7 @@ Sar.ctrl3                                          <- update(Sar.ctrl3)
                               starting.values=init.sam,
                               map=list(logSdLogN=as.factor(c(-1.5,NA))))
 
-runname <- "all surveys fixed PE0.2"
+runname <- "all surveys fixed PE0.2 latest data"
 assess<- Sar
 mat(assess)[1,]  <- 0
 assess.sam <-SAR.sam0.2
@@ -153,8 +153,9 @@ assess.tun <- Sar.tun
 assess.ctrl<-  Sar.ctrl3
 library(stockassessment)
 source("createAssessmentPlots.r")
+Sar.stk <- assess+SAR.sam0.2
 
-
+ save(Sar.stk,SAR.sam0.2,file="SAM assessment lastest data.RData")
 
 ######################3
 #test sensitivity to the fixed PE values : compare 0.15,0.2,0.22

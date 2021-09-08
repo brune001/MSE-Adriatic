@@ -63,8 +63,8 @@ save(ANE , file = file.path(data.source,"ANEstk.RData"))
 ANE.tun   <- readFLIndices(file.path(data.source, "Ane17_18_fl.dat"))
 
 ## Set the Index Type
-ANE.tun[[1]]@type               <- "number"
-ANE.tun[[2]]@type               <- "number"
+ANE.tun[[1]]@type               <- "numbers"
+ANE.tun[[2]]@type               <- "numbers"
 ANE.tun[[3]]@type               <- "biomass"
 
 #Set names
